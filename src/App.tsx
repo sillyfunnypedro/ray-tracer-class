@@ -1,23 +1,20 @@
-import React from 'react';
+import React, { useState, } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Color from './Color';
+import FrameBuffer from './FrameBuffer'
+import FrameBufferComponent from './FrameBufferComponent'
 
 function App() {
+
+  const [frame, setFrame] = useState(new FrameBuffer(80, 80));
+
+  // 
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+
+        <FrameBufferComponent width={10} height={10} frameBuffer={frame} />
       </header>
     </div>
   );
