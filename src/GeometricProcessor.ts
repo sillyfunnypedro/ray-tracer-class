@@ -25,7 +25,6 @@ class GeometricProcessor {
         for (let j = y; j < y + height; j++) {
             GeometricProcessor.drawLine(x, j, x + width, j, color, frameBuffer);
         }
-
     }
 
     static fillTriangle(x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, borderColor: Color, color: Color, frameBuffer: FrameBuffer) {
