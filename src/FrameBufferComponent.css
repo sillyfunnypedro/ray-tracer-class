@@ -1,5 +1,7 @@
 .pixel {
     width: 5px;
     height: 5px;
-    border: 0px;
+    border: none;
+    padding: 0px;
+    margin: 0px;
 }

@@ -5,8 +5,6 @@ import FrameBuffer from "./FrameBuffer";
 import "./FrameBufferComponent.css";
 
 interface FrameBufferProps {
-    width: number;
-    height: number;
     frameBuffer: FrameBuffer
 }
 
@@ -31,7 +29,8 @@ const FrameBufferComponent: React.FC<FrameBufferProps> = (props) => {
                             <tr key={rowIndex}>
                                 {row.map((pixel, pixelIndex) => {
                                     return (
-                                        <td key={pixelIndex}>
+                                        <td key={pixelIndex}
+                                            style={{ padding: 0, margin: 0 }}>
                                             <Pixel color={pixel.toHex()} />
 
                                         </td>

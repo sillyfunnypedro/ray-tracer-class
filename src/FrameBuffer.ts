@@ -32,6 +32,10 @@ class FrameBuffer {
 
     }
 
+    getPixel(x: number, y: number): Color {
+        return this.pixels[y][x];
+    }
+
     getFrameBuffer() {
         return this.pixels;
     }
