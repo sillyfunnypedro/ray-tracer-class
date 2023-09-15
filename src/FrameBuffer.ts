@@ -17,12 +17,23 @@ class FrameBuffer {
         this.initPixels();
     }
 
+    clear(r: number, g: number, b: number) {
+        for (let i = 0; i < this.height; i++) {
+            for (let j = 0; j < this.width; j++) {
+                this.pixels[i][j].r = r;
+                this.pixels[i][j].g = g;
+                this.pixels[i][j].b = b;
+            }
+        }
+    }
+
+
     initPixels() {
         for (let i = 0; i < this.height; i++) {
             this.pixels[i] = new Array(this.width);
             for (let j = 0; j < this.width; j++) {
 
-                this.pixels[i][j] = new Color(23, 128, 44);
+                this.pixels[i][j] = new Color(0, 0, 0);
             }
         }
     }

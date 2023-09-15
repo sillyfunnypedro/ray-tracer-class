@@ -27,6 +27,38 @@ class GeometricProcessor {
         }
     }
 
+    /**
+     * 
+     * @param x0 
+     * @param x1 
+     * @param y 
+     * @param color0 
+     * @param color1 
+     * @param frameBuffer 
+     * 
+     * Draw the pixels between x0 and x1 on the y line with color0 and color1
+     * Assume x0 < x1
+     */
+    static scanLineColor(x0: number, x1: number, y: number, color0: Color, color1: Color, frameBuffer: FrameBuffer) {
+
+        let dx = Math.abs(x1 - x0);
+        let t = 0;
+        for (let i = x0; i <= x1; i++) {
+            if (dx === 0) {
+                t = 0;
+            }
+            else {
+                t = (i - x0) / dx;
+            }
+            const color = Color.interpolate(color0, color1, t);
+            frameBuffer.setPixel(i, y, color);
+        }
+    }
+
+
+
+
+
     static fillTriangle(x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, borderColor: Color, color: Color, frameBuffer: FrameBuffer) {
 
 
@@ -59,6 +91,7 @@ class GeometricProcessor {
 
 
 
+
         // For upper part of triangle, find scanline crossings for segments
         // 0-1 and 0-2.  If y1=y2 (flat-bottomed triangle), the scanline y1
         // is included here (and second loop will be skipped, avoiding a /0
@@ -73,6 +106,8 @@ class GeometricProcessor {
 
             a = x0 + (x1 - x0) * (y - y0) / (y1 - y0);
             b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
+
+
 
             if (a > b) [a, b] = [b, a];
             // shift a to the next integer, and b to the integer that preceeds it
@@ -103,6 +138,141 @@ class GeometricProcessor {
 
 
 
+    }
+    static fillTriangleColor(x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, color0: Color, color1: Color, color2: Color, frameBuffer: FrameBuffer) {
+
+
+        let a, b, y, last;
+        let color_a: Color = new Color(0, 0, 0),
+            color_b: Color = new Color(0, 0, 0);
+
+        //Sort coordinates by Y order(y2 >= y1 >= y0)
+        if (y0 > y1) {
+            [y0, y1] = [y1, y0];
+            [x0, x1] = [x1, x0];
+            let temp = color0;
+            color0 = color1;
+            color1 = temp;
+        }
+        if (y1 > y2) {
+            [y2, y1] = [y1, y2];
+            [x2, x1] = [x1, x2];
+            let temp = color1;
+            color1 = color2;
+            color2 = temp;
+        }
+        if (y0 > y1) {
+            [y0, y1] = [y1, y0];
+            [x0, x1] = [x1, x0];
+            let temp = color0;
+            color0 = color1;
+            color1 = temp;
+        }
+
+        if (y0 === y2) { // Handle awkward all-on-same-line case as its own thing
+            a = b = x0;
+            if (x1 < a) {
+                a = x1;
+                color_a = color1;
+            }
+            else if (x1 > b) {
+                b = x1;
+                color_b = color1;
+            }
+            if (x2 < a) {
+                a = x2;
+                color_a = color2;
+            }
+            else if (x2 > b) {
+                b = x2;
+            }
+            GeometricProcessor.scanLineColor(a, b, y0, color_a, color_b, frameBuffer);
+            return;
+
+        }
+
+        // set up the interpolation for the colors
+        let b_t = 0;
+        let a_t = 0;
+
+        // For upper part of triangle, find scanline crossings for segments
+        // 0-1 and 0-2.  If y1=y2 (flat-bottomed triangle), the scanline y1
+        // is included here (and second loop will be skipped, avoiding a /0
+        // error there), otherwise scanline y1 is skipped here and handled
+        // in the second loop...which also avoids a /0 error here if y0=y1
+        // (flat-topped triangle).
+        if (y1 === y2) last = y1;   // Include y1 scanline
+        else last = y1 - 1; // Skip it
+
+        for (y = y0; y <= last; y++) {
+
+
+            a = x0 + (x1 - x0) * (y - y0) / (y1 - y0);
+            b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
+
+            // update the color interpolation
+            b_t = (y - y0) / (y2 - y0);
+            a_t = (y - y0) / (y1 - y0);
+            color_b = Color.interpolate(color0, color2, b_t);
+
+            color_a = Color.interpolate(color0, color1, a_t);
+
+            if (a > b) [a, b] = [b, a];
+            // shift a to the next integer, and b to the integer that preceeds it
+            a = Math.ceil(a);
+            b = Math.floor(b);
+            GeometricProcessor.scanLineColor(a, b, y, color_a, color_b, frameBuffer);
+        }
+
+        a_t = 0;
+        // For lower part of triangle, find scanline crossings for segments
+        // 0-2 and 1-2.  This loop is skipped if y1=y2.
+
+        for (; y <= y2; y++) {
+
+            a = x1 + (x2 - x1) * (y - y1) / (y2 - y1);
+            b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
+
+            // update the color interpolation
+            b_t = (y - y0) / (y2 - y0);
+            a_t = (y - y1) / (y2 - y1);
+            let color_b = Color.interpolate(color0, color2, b_t);
+
+            let color_a = Color.interpolate(color1, color1, a_t);
+
+            if (a > b) [a, b] = [b, a];
+            a = Math.ceil(a);
+            b = Math.floor(b);
+            GeometricProcessor.scanLineColor(a, b, y, color_a, color_b, frameBuffer);
+        }
+    }
+
+    /**
+     * Draw an array of triangles defined by a data buffer.  each vertex is defined by 3 floats (x,y,z) and 3 floats for the color (r,g,b)
+     * the triangles are defined by an array of indices three per triangle
+     * The z values are ignored for now.
+     * @param dataBuffer
+     * @param frameBuffer
+     * @param width
+     */
+    static fillTriangles(dataBuffer: number[], indexBuffer: number[], numTriangles: number, frameBuffer: FrameBuffer) {
+
+        for (let i = 0; i < numTriangles; i++) {
+            let index = i * 3;
+            let index0 = indexBuffer[index];
+            let index1 = indexBuffer[index + 1];
+            let index2 = indexBuffer[index + 2];
+
+            let vertex0 = [dataBuffer[index0 * 6], dataBuffer[index0 * 6 + 1], dataBuffer[index0 * 6 + 2]];
+            let vertex1 = [dataBuffer[index1 * 6], dataBuffer[index1 * 6 + 1], dataBuffer[index1 * 6 + 2]];
+            let vertex2 = [dataBuffer[index2 * 6], dataBuffer[index2 * 6 + 1], dataBuffer[index2 * 6 + 2]];
+
+            let color0 = new Color(dataBuffer[index0 * 6 + 3], dataBuffer[index0 * 6 + 4], dataBuffer[index0 * 6 + 5]);
+            let color1 = new Color(dataBuffer[index1 * 6 + 3], dataBuffer[index1 * 6 + 4], dataBuffer[index1 * 6 + 5]);
+            let color2 = new Color(dataBuffer[index2 * 6 + 3], dataBuffer[index2 * 6 + 4], dataBuffer[index2 * 6 + 5]);
+
+            GeometricProcessor.fillTriangleColor(vertex0[0], vertex0[1], vertex1[0], vertex1[1], vertex2[0], vertex2[1], color0, color1, color2, frameBuffer);
+        }
     }
 
 }
