@@ -143,8 +143,8 @@ class GeometricProcessor {
 
 
         let a, b, y, last;
-        let color_a: Color = new Color(0, 0, 0),
-            color_b: Color = new Color(0, 0, 0);
+        let color_a: Color = color0;
+        let color_b: Color = color2;
 
         //Sort coordinates by Y order(y2 >= y1 >= y0)
         if (y0 > y1) {
@@ -171,6 +171,8 @@ class GeometricProcessor {
 
         if (y0 === y2) { // Handle awkward all-on-same-line case as its own thing
             a = b = x0;
+            color_a = color0;
+            color_b = color0;
             if (x1 < a) {
                 a = x1;
                 color_a = color1;
@@ -185,6 +187,7 @@ class GeometricProcessor {
             }
             else if (x2 > b) {
                 b = x2;
+                color_b = color2;
             }
             GeometricProcessor.scanLineColor(a, b, y0, color_a, color_b, frameBuffer);
             return;
@@ -217,7 +220,10 @@ class GeometricProcessor {
 
             color_a = Color.interpolate(color0, color1, a_t);
 
-            if (a > b) [a, b] = [b, a];
+            if (a > b) {
+                [a, b] = [b, a];
+                [color_a, color_b] = [color_b, color_a];
+            }
             // shift a to the next integer, and b to the integer that preceeds it
             a = Math.ceil(a);
             b = Math.floor(b);
@@ -238,9 +244,12 @@ class GeometricProcessor {
             a_t = (y - y1) / (y2 - y1);
             let color_b = Color.interpolate(color0, color2, b_t);
 
-            let color_a = Color.interpolate(color1, color1, a_t);
+            let color_a = Color.interpolate(color1, color2, a_t);
 
-            if (a > b) [a, b] = [b, a];
+            if (a > b) {
+                [a, b] = [b, a];
+                [color_a, color_b] = [color_b, color_a];
+            }
             a = Math.ceil(a);
             b = Math.floor(b);
             GeometricProcessor.scanLineColor(a, b, y, color_a, color_b, frameBuffer);

@@ -21,7 +21,6 @@ const FrameBufferComponent: React.FC<FrameBufferProps> = (props) => {
 
     return (
         <div>
-            <h2>Frame Buffer</h2>
             <table>
                 <tbody>
                     {frame.pixels.map((row, rowIndex) => {

@@ -7,7 +7,7 @@ import GeometricProcessor from './GeometricProcessor'
 
 function App() {
 
-  const [frame, setFrame] = useState(new FrameBuffer(100, 100));
+  const [frame, setFrame] = useState(new FrameBuffer(320, 200));
 
   frame.clear(100, 100, 100);
   // GeometricProcessor.drawLine(0, 0, 0, 99, new Color(128, 128, 128), frame);
@@ -22,12 +22,12 @@ function App() {
 
   GeometricProcessor.fillTriangles([
 
-    10, 10, 0, 255, 0, 0,
+    0, 10, 0, 255, 0, 0,
     90, 30, 0, 0, 255, 0,
     20, 89, 0, 0, 0, 255,
-    95, 95, 0, 128, 128, 128,
+    95, 140, 0, 255, 0, 0,
     90, 10, 0, 0, 255, 0,
-    45, 20, 0, 0, 0, 255, 0], [0, 1, 2, 3, 1, 2, 0, 4, 5], 2, frame);
+    45, 10, 0, 0, 0, 255, 0], [1, 2, 3, 0, 1, 2, 0, 4, 5], 3, frame);
 
   // 
   return (
