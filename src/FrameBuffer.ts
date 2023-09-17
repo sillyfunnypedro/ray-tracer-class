@@ -47,6 +47,9 @@ class FrameBuffer {
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
             return;
         }
+        // make the coordinates integers
+        x = Math.round(x);
+        y = Math.round(y);
         this.pixels[y][x] = color;
 
     }

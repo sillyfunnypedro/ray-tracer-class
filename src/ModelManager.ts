@@ -19,6 +19,7 @@ class ModelManager {
 
     constructor() {
         this.models.set("mesh", this.drawMesh);
+        this.models.set("triangleFan", this.drawTriangleFan);
     }
 
     getModels(): string[] {
@@ -32,6 +33,61 @@ class ModelManager {
             drawFunction(frame, drawBorder, borderColor);
         }
     }
+
+
+    /**
+     * 
+     * @param frame
+     * @param drawBorder 
+     * @param borderColor 
+     * 
+     * Draw a triangle fan to test the drawTriangleFan function
+     * The colors of the outside vertices alternate between color1 and color2
+     */
+    private drawTriangleFan(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
+        const x = 10;
+        const y = frame.height - 10;
+        const r = 150;
+        const numTriangles = 5;
+        const color0 = new Color(255, 0, 0);
+        const color1 = new Color(0, 255, 0);
+        const color2 = new Color(0, 0, 255);
+
+
+        const vertices: number[] = [];
+
+
+        vertices.push(x);
+        vertices.push(y);
+        vertices.push(0);
+
+        vertices.push(Math.floor(color0.r));
+        vertices.push(Math.floor(color0.g));
+        vertices.push(Math.floor(color0.b));
+
+        for (let i = 0; i < numTriangles + 1; i++) {
+            const s = i / numTriangles;
+            const t = 0;
+            let color = color1;
+            if (i % 2 === 0) {
+                color = color2;
+            }
+            const angle = -s * Math.PI / 2;
+            const x1 = x + r * Math.cos(angle);
+            const y1 = y + r * Math.sin(angle);
+            vertices.push(x1);
+            vertices.push(y1);
+            vertices.push(0);
+            vertices.push(Math.floor(color.r));
+            vertices.push(Math.floor(color.g));
+            vertices.push(Math.floor(color.b));
+        }
+
+        GeometricProcessor.fillTriangleFan(vertices, frame, drawBorder, borderColor);
+
+    }
+
+
 
 
 
@@ -89,5 +145,9 @@ class ModelManager {
         GeometricProcessor.fillTriangles(vertices, indices, numTriangles, frame, drawBorder, borderColor);
     }
 }
+
+
+
+
 
 export default ModelManager;

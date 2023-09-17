@@ -5,6 +5,13 @@ class GeometricProcessor {
     // draw a line using breseham algorithm
 
     static drawLine(x0: number, y0: number, x1: number, y1: number, color: Color, frameBuffer: FrameBuffer) {
+        // Make sure that all the coordinates are integers
+        x0 = Math.round(x0);
+        y0 = Math.round(y0);
+        x1 = Math.round(x1);
+        y1 = Math.round(y1);
+
+
         let dx = Math.abs(x1 - x0);
         let dy = Math.abs(y1 - y0);
         let sx = (x0 < x1) ? 1 : -1;
@@ -40,6 +47,18 @@ class GeometricProcessor {
      * Assume x0 < x1
      */
     static scanLineColor(x0: number, x1: number, y: number, color0: Color, color1: Color, frameBuffer: FrameBuffer) {
+
+        // clip the line to the screen
+        if (x0 < 0) {
+            x0 = 0;
+        }
+        if (x1 >= frameBuffer.width) {
+            x1 = frameBuffer.width - 1;
+        }
+
+        if (y < 0 || y >= frameBuffer.height) {
+            return;
+        }
 
         let dx = Math.abs(x1 - x0);
         let t = 0;
@@ -290,7 +309,7 @@ class GeometricProcessor {
         }
     }
 
-    static fillTrianglesFan(dataBuffer: number[], frameBuffer: FrameBuffer, drawBorder: boolean = false, borderColor: Color = new Color(0, 0, 0)) {
+    static fillTriangleFan(dataBuffer: number[], frameBuffer: FrameBuffer, drawBorder: boolean = false, borderColor: Color = new Color(0, 0, 0)) {
 
 
 

@@ -12,14 +12,13 @@ const modelManager = new ModelManager();
 function App() {
 
   const [frame, setFrame] = useState(new FrameBuffer(320, 200));
-  const [drawBorder, setDrawBorder] = useState(true);
+  const [drawBorder, setDrawBorder] = useState(false);
   const [borderColor, setBorderColor] = useState(new Color(255, 255, 255));
   const [selectedModel, setSelectedModel] = useState("mesh");
 
 
   // a call back to set the model to draw
-  // the parameter is a button
-  // the model is the name of the string in the button
+
   function setModel(event: React.MouseEvent<HTMLButtonElement>): void {
     const button = event.currentTarget;
     const model = button.textContent;
@@ -29,7 +28,7 @@ function App() {
   }
 
 
-  // a function that calls models.getModels and produces buttons for selecting models
+  // a Component that calls models.getModels and produces buttons for selecting models
   function ModelSelectionComponent() {
     const modelNames = modelManager.getModels();
 
