@@ -350,9 +350,69 @@ class GeometricProcessor {
                 GeometricProcessor.drawLine(vertex1[0], vertex1[1], vertex2[0], vertex2[1], borderColor, frameBuffer);
             }
         }
+    }
+
+    /**
+     * 
+     * @param dataBuffer fillTriangleStrip
+     * @param frameBuffer 
+     * @param drawBorder 
+     * @param borderColor 
+     */
+
+    static fillTriangleStrip(dataBuffer: number[], frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
+        const num_vertices = dataBuffer.length / 6;
+        const num_triangles = num_vertices - 2;
+
+        // define the variables so we don not get undefined since there is an if in the loop.
+        let vertex0 = [dataBuffer[0], dataBuffer[1], dataBuffer[2]];
+        let vertex1 = vertex0;
+        let vertex2 = vertex0;
+
+        let color0 = new Color(dataBuffer[3], dataBuffer[4], dataBuffer[5]);
+        let color1 = color0;
+        let color2 = color0;
+
+        for (let i = 0; i < num_triangles; i++) {
+            let index = i * 6;
+            let index0 = index;
+            let index1 = index + 6;
+            let index2 = index + 12;
+
+
+            // for a triangle strip the alternating triangles are reversed so the winding order is correct
+            // 0 1 2 is the order
+            if (i % 2 === 1) {
+                vertex0 = [dataBuffer[index0], dataBuffer[index0 + 1], dataBuffer[index0 + 2]];
+                vertex1 = [dataBuffer[index1], dataBuffer[index1 + 1], dataBuffer[index1 + 2]];
+                vertex2 = [dataBuffer[index2], dataBuffer[index2 + 1], dataBuffer[index2 + 2]];
+
+                color0 = new Color(dataBuffer[index0 + 3], dataBuffer[index0 + 4], dataBuffer[index0 + 5]);
+                color1 = new Color(dataBuffer[index1 + 3], dataBuffer[index1 + 4], dataBuffer[index1 + 5]);
+                color2 = new Color(dataBuffer[index2 + 3], dataBuffer[index2 + 4], dataBuffer[index2 + 5]);
+            } else { // 0 2 1 is the order
+                vertex0 = [dataBuffer[index0], dataBuffer[index0 + 1], dataBuffer[index0 + 2]];
+                vertex1 = [dataBuffer[index2], dataBuffer[index2 + 1], dataBuffer[index2 + 2]];
+                vertex2 = [dataBuffer[index1], dataBuffer[index1 + 1], dataBuffer[index1 + 2]];
+
+                color0 = new Color(dataBuffer[index0 + 3], dataBuffer[index0 + 4], dataBuffer[index0 + 5]);
+                color1 = new Color(dataBuffer[index2 + 3], dataBuffer[index2 + 4], dataBuffer[index2 + 5]);
+                color2 = new Color(dataBuffer[index1 + 3], dataBuffer[index1 + 4], dataBuffer[index1 + 5]);
+            }
 
 
 
+
+            GeometricProcessor.fillTriangleColor(vertex0[0], vertex0[1], vertex1[0], vertex1[1], vertex2[0], vertex2[1], color0, color1, color2, frameBuffer);
+            if (drawBorder) {
+                GeometricProcessor.drawLine(vertex0[0], vertex0[1], vertex1[0], vertex1[1], borderColor, frameBuffer);
+                GeometricProcessor.drawLine(vertex0[0], vertex0[1], vertex2[0], vertex2[1], borderColor, frameBuffer);
+                GeometricProcessor.drawLine(vertex1[0], vertex1[1], vertex2[0], vertex2[1], borderColor, frameBuffer);
+            }
+
+
+
+        }
     }
 }
 

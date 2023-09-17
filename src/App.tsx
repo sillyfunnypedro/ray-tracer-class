@@ -69,13 +69,17 @@ function App() {
     );
   }
 
+  /**
+   *  A callback to handle changes to the pixel size slider
+   * @param event 
+   */
   function onPixelSizeChange(event: React.ChangeEvent<HTMLInputElement>) {
     const slider = event.currentTarget;
     const size = parseInt(slider.value);
     setPixelSize(size);
   }
 
-  // define a slider that goes from 1 to 5
+  // define a slider that goes from 1 to maxPixelSize
   function PixelSizeComponent() {
     return (
       <div>
@@ -96,7 +100,10 @@ function App() {
   }
 
 
-
+  /** 
+   * Get the image from the frame buffer and draw it on the canvas
+   * 
+   */
   function bufferImage() {
     const data = frame.getImageData(pixelSize);
     // now construct an image from the data

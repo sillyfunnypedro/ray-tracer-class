@@ -18,8 +18,9 @@ class ModelManager {
     models = new Map<string, (frame: FrameBuffer, drawBorder: boolean, borderColor: Color) => void>();
 
     constructor() {
-        this.models.set("mesh", this.drawMesh);
-        this.models.set("triangleFan", this.drawTriangleFan);
+        this.models.set("mesh", this.generateMesh);
+        this.models.set("triangleFan", this.generateTriangleFan);
+        this.models.set("triangleStrip", this.generateTriangleStrip);
     }
 
     getModels(): string[] {
@@ -34,10 +35,97 @@ class ModelManager {
         }
     }
 
+    /**
+     * generateTriangleStrip
+     * @param frame
+     * @param drawBorder
+     * @param borderColor
+     * 
+     * Draw a triangle strip to test the drawTriangleStrip function
+     * The colors of the outside vertices alternate between color0, color1 and color2
+     * The triangles make up a torus centered at the center of the frame buffer
+     * The inner radius of the torus is defined by the variable innerRadius
+     * The outer radius of the torus is defined by the variable outerRadius
+     * see https://en.wikipedia.org/wiki/Triangle_strip
+     */
+    private generateTriangleStrip(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
+        const x = frame.width / 2;
+        const y = frame.height / 2;
+
+        const innerRadius = 40;
+        const outerRadius = 80;
+
+        let numSegments = 18; // each segment has two triangles
+        const colors: Color[] = [
+            new Color(255, 0, 0),
+            new Color(0, 255, 0),
+            new Color(0, 0, 255)
+        ];
+
+
+        const vertices: number[] = [];
+
+        const angleStep = 2 * Math.PI / numSegments;
+
+
+
+
+        for (let i = 0; i < numSegments; i++) {
+            const currAngle = i * angleStep;
+            const nextAngle = (i + 1) * angleStep;
+
+            const x0 = x + innerRadius * Math.cos(currAngle);
+            const y0 = y + innerRadius * Math.sin(currAngle);
+            const x1 = x + outerRadius * Math.cos(currAngle);
+            const y1 = y + outerRadius * Math.sin(currAngle);
+            const x2 = x + innerRadius * Math.cos(nextAngle);
+            const y2 = y + innerRadius * Math.sin(nextAngle);
+            const x3 = x + outerRadius * Math.cos(nextAngle);
+            const y3 = y + outerRadius * Math.sin(nextAngle);
+
+            if (i == 0) {
+
+                vertices.push(x0);
+                vertices.push(y0);
+                vertices.push(0);
+                vertices.push(Math.floor(colors[i % 3].r));
+                vertices.push(Math.floor(colors[i % 3].g));
+                vertices.push(Math.floor(colors[i % 3].b));
+
+                vertices.push(x1);
+                vertices.push(y1);
+                vertices.push(0);
+                vertices.push(Math.floor(colors[(i + 2) % 3].r));
+                vertices.push(Math.floor(colors[(i + 2) % 3].g));
+                vertices.push(Math.floor(colors[(i + 2) % 3].b));
+            }
+            vertices.push(x2);
+            vertices.push(y2);
+            vertices.push(0);
+            vertices.push(Math.floor(colors[(i + 1) % 3].r));
+            vertices.push(Math.floor(colors[(i + 1) % 3].g));
+            vertices.push(Math.floor(colors[(i + 1) % 3].b));
+
+            vertices.push(x3);
+            vertices.push(y3);
+            vertices.push(0);
+            vertices.push(Math.floor(colors[i % 3].r));
+            vertices.push(Math.floor(colors[i % 3].g));
+            vertices.push(Math.floor(colors[i % 3].b));
+
+        }
+
+        GeometricProcessor.fillTriangleStrip(vertices, frame, drawBorder, borderColor);
+
+    }
+
+
+
+
 
 
     /**
-     * 
+     * generateTriangleFan
      * @param frame
      * @param drawBorder 
      * @param borderColor 
@@ -45,7 +133,7 @@ class ModelManager {
      * Draw a triangle fan to test the drawTriangleFan function
      * The colors of the outside vertices alternate between color1 and color2
      */
-    private drawTriangleFan(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
+    private generateTriangleFan(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
         const x = 10;
         const y = frame.height - 10;
         const r = 150;
@@ -96,7 +184,7 @@ class ModelManager {
      * Draw a mesh to test the drawTriangles function
      * @param frame 
      */
-    private drawMesh(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
+    private generateMesh(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
         // you can change the constants here to change the look of the mesh
         const x = 10;
         const y = 10;
