@@ -79,7 +79,12 @@ class GeometricProcessor {
 
 
     static fillTriangle(x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, borderColor: Color, color: Color, frameBuffer: FrameBuffer) {
-
+        x0 = Math.round(x0);
+        y0 = Math.round(y0);
+        x1 = Math.round(x1);
+        y1 = Math.round(y1);
+        x2 = Math.round(x2);
+        y2 = Math.round(y2);
 
         let a, b, y, last;
 
@@ -159,6 +164,13 @@ class GeometricProcessor {
 
     }
     static fillTriangleColor(x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, color0: Color, color1: Color, color2: Color, frameBuffer: FrameBuffer) {
+        // make all the coordinates integers
+        x0 = Math.round(x0);
+        y0 = Math.round(y0);
+        x1 = Math.round(x1);
+        y1 = Math.round(y1);
+        x2 = Math.round(x2);
+        y2 = Math.round(y2);
 
 
         let a, b, y, last;
