@@ -9,7 +9,7 @@ import FrameBuffer from "./FrameBuffer";
 import Color from "./Color";
 
 
-class Models {
+class ModelManager {
 
     /** 
      * A map of strings to functions that take a frame buffer and draw a model
@@ -21,13 +21,14 @@ class Models {
         this.models.set("mesh", this.drawMesh);
     }
 
-    listOfModels(): string[] {
+    getModels(): string[] {
         return Array.from(this.models.keys());
     }
 
     drawModel(model: string, frame: FrameBuffer, drawBorder: boolean = false, borderColor: Color = new Color(0, 0, 0)): void {
         const drawFunction = this.models.get(model);
         if (drawFunction) {
+            frame.clear(128, 128, 128);
             drawFunction(frame, drawBorder, borderColor);
         }
     }
@@ -89,4 +90,4 @@ class Models {
     }
 }
 
-export default Models;
+export default ModelManager;
