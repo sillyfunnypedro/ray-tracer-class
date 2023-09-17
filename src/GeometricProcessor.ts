@@ -283,7 +283,7 @@ class GeometricProcessor {
      * @param frameBuffer
      * @param width
      */
-    static fillTriangles(dataBuffer: number[], indexBuffer: number[], numTriangles: number, frameBuffer: FrameBuffer, drawBorder: boolean = false, borderColor: Color = new Color(0, 0, 0)) {
+    static fillTriangles(dataBuffer: number[], indexBuffer: number[], numTriangles: number, frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
 
         for (let i = 0; i < numTriangles; i++) {
             let index = i * 3;
@@ -309,7 +309,7 @@ class GeometricProcessor {
         }
     }
 
-    static fillTriangleFan(dataBuffer: number[], frameBuffer: FrameBuffer, drawBorder: boolean = false, borderColor: Color = new Color(0, 0, 0)) {
+    static fillTriangleFan(dataBuffer: number[], frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
 
 
 

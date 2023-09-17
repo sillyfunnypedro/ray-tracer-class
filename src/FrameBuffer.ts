@@ -25,7 +25,9 @@ class FrameBuffer {
                 this.pixels[i][j].r = r;
                 this.pixels[i][j].g = g;
                 this.pixels[i][j].b = b;
+                this.zBuffer[i][j] = 0;
             }
+
         }
     }
 
@@ -50,7 +52,9 @@ class FrameBuffer {
         // make the coordinates integers
         x = Math.round(x);
         y = Math.round(y);
-        this.pixels[y][x] = color;
+        this.pixels[y][x].r = color.r;
+        this.pixels[y][x].g = color.g;
+        this.pixels[y][x].b = color.b;
 
     }
 
@@ -63,10 +67,16 @@ class FrameBuffer {
             return;
         }
         this.zBuffer[y][x] = depth;
-        this.pixels[y][x] = color;
+        this.pixels[y][x].r = color.r;
+        this.pixels[y][x].g = color.g;
+        this.pixels[y][x].b = color.b;
     }
 
     getPixel(x: number, y: number): Color {
+        let result = new Color(0, 0, 0);
+        result.r = this.pixels[y][x].r;
+        result.g = this.pixels[y][x].g;
+        result.b = this.pixels[y][x].b;
         return this.pixels[y][x];
     }
 

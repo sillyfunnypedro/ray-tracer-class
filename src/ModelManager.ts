@@ -26,10 +26,10 @@ class ModelManager {
         return Array.from(this.models.keys());
     }
 
-    drawModel(model: string, frame: FrameBuffer, drawBorder: boolean = false, borderColor: Color = new Color(0, 0, 0)): void {
+    drawModel(model: string, frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
         const drawFunction = this.models.get(model);
         if (drawFunction) {
-            frame.clear(128, 128, 128);
+            frame.clear(129, 128, 128);
             drawFunction(frame, drawBorder, borderColor);
         }
     }
