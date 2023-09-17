@@ -6,6 +6,7 @@ import "./FrameBufferComponent.css";
 
 interface FrameBufferProps {
     frameBuffer: FrameBuffer
+    frameNumber: number
 }
 
 // 

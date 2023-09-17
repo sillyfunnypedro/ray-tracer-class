@@ -40,6 +40,14 @@ class Color {
             color0.b + (color1.b - color0.b) * t
         );
     }
+
+    // A function to interpolate 4 colours based on s and t
+
+    static interpolate2d(color0: Color, color1: Color, color2: Color, color3: Color, s: number, t: number): Color {
+        const leftColor = Color.interpolate(color0, color1, s);
+        const rightColor = Color.interpolate(color3, color2, s);
+        return Color.interpolate(leftColor, rightColor, t);
+    }
 }
 
 

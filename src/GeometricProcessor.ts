@@ -264,7 +264,7 @@ class GeometricProcessor {
      * @param frameBuffer
      * @param width
      */
-    static fillTriangles(dataBuffer: number[], indexBuffer: number[], numTriangles: number, frameBuffer: FrameBuffer) {
+    static fillTriangles(dataBuffer: number[], indexBuffer: number[], numTriangles: number, frameBuffer: FrameBuffer, drawBorder: boolean = false, borderColor: Color = new Color(0, 0, 0)) {
 
         for (let i = 0; i < numTriangles; i++) {
             let index = i * 3;
@@ -281,9 +281,48 @@ class GeometricProcessor {
             let color2 = new Color(dataBuffer[index2 * 6 + 3], dataBuffer[index2 * 6 + 4], dataBuffer[index2 * 6 + 5]);
 
             GeometricProcessor.fillTriangleColor(vertex0[0], vertex0[1], vertex1[0], vertex1[1], vertex2[0], vertex2[1], color0, color1, color2, frameBuffer);
+
+            if (drawBorder) {
+                GeometricProcessor.drawLine(vertex0[0], vertex0[1], vertex1[0], vertex1[1], borderColor, frameBuffer);
+                GeometricProcessor.drawLine(vertex0[0], vertex0[1], vertex2[0], vertex2[1], borderColor, frameBuffer);
+                GeometricProcessor.drawLine(vertex1[0], vertex1[1], vertex2[0], vertex2[1], borderColor, frameBuffer);
+            }
         }
     }
 
+    static fillTrianglesFan(dataBuffer: number[], frameBuffer: FrameBuffer, drawBorder: boolean = false, borderColor: Color = new Color(0, 0, 0)) {
+
+
+
+        const numVertices = dataBuffer.length / 6;
+        const numTriangles = numVertices - 2;
+
+        const vertex0 = [dataBuffer[0], dataBuffer[1], dataBuffer[2]];
+        const color0 = new Color(dataBuffer[3], dataBuffer[4], dataBuffer[5]);
+
+        for (let i = 0; i < numTriangles; i++) {
+            let index = (i + 1) * 6;
+
+            let vertex1 = [dataBuffer[index], dataBuffer[index + 1], dataBuffer[index + 2]];
+            let vertex2 = [dataBuffer[index + 6], dataBuffer[index + 7], dataBuffer[index + 8]];
+
+            let color1 = new Color(dataBuffer[index + 3], dataBuffer[index + 4], dataBuffer[index + 5]);
+            let color2 = new Color(dataBuffer[index + 9], dataBuffer[index + 10], dataBuffer[index + 11]);
+
+
+
+            GeometricProcessor.fillTriangleColor(vertex0[0], vertex0[1], vertex1[0], vertex1[1], vertex2[0], vertex2[1], color0, color1, color2, frameBuffer);
+
+            if (drawBorder) {
+                GeometricProcessor.drawLine(vertex0[0], vertex0[1], vertex1[0], vertex1[1], borderColor, frameBuffer);
+                GeometricProcessor.drawLine(vertex0[0], vertex0[1], vertex2[0], vertex2[1], borderColor, frameBuffer);
+                GeometricProcessor.drawLine(vertex1[0], vertex1[1], vertex2[0], vertex2[1], borderColor, frameBuffer);
+            }
+        }
+
+
+
+    }
 }
 
 
