@@ -14,8 +14,9 @@ function App() {
 
   const [frame, setFrame] = useState(new FrameBuffer(320, 200));
   const [drawBorder, setDrawBorder] = useState(true);
-  const [borderColor, setBorderColor] = useState(new Color(0, 0, 0));
-  const [selectedModel, setSelectedModel] = useState("mesh");
+  const [selectedModel, setSelectedModel] = useState("");
+  const [borderColor, setBorderColor] = useState(new Color(20, 20, 20));
+  const [pixelSize, setPixelSize] = useState(4);
 
 
   // a call back to set the model to draw
@@ -27,6 +28,11 @@ function App() {
       setSelectedModel(model);
     }
   }
+
+  // make sure the render happens on start up.
+  useEffect(() => {
+    setSelectedModel("mesh");
+  }, []);
 
 
   // a Component that calls models.getModels and produces buttons for selecting models
@@ -64,15 +70,32 @@ function App() {
 
 
 
+  function bufferImage() {
+    const pixelSize = 4;
+    const data = frame.getImageData(pixelSize);
+    // now construct an image from the data
+    const ctx = canvasRef.current?.getContext('2d');
+    if (ctx) {
+      const imageData = new ImageData(data, frame.width * pixelSize, frame.height * pixelSize);
+      ctx.putImageData(imageData, 0, 0);
+
+
+    }
+    return (
+      <canvas ref={canvasRef} width={frame.width * 4} height={frame.height * 4} />
+    );
+  }
+
+  // draw the model
   modelManager.drawModel(selectedModel, frame, drawBorder, borderColor);
 
   return (
     <div className="App">
       <header className="App-header">
-        <h5> The slowest frame buffer in the world.</h5>
-        <FrameBufferComponent frameBuffer={frame} frameNumber={1} />
+        {bufferImage()}
         <ModelSelectionComponent />
         <BorderControlComponent />
+
       </header>
     </div>
   );

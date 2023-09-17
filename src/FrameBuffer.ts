@@ -31,6 +31,35 @@ class FrameBuffer {
         }
     }
 
+    getImageData(pixelSize: number): Uint8ClampedArray {
+        if (pixelSize === undefined || pixelSize === null || pixelSize < 1) {
+            pixelSize = 1;
+        }
+        let data: Uint8ClampedArray = new Uint8ClampedArray(this.width * this.height * 4 * pixelSize * pixelSize);
+
+        for (let i = 0; i < this.height; i++) {
+            for (let k = 0; k < pixelSize; k++) {
+                for (let j = 0; j < this.width; j++) {
+
+
+                    for (let l = 0; l < pixelSize; l++) {
+                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4] = this.pixels[i][j].r;
+                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4 + 1] = this.pixels[i][j].g;
+                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4 + 2] = this.pixels[i][j].b;
+                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4 + 3] = 255;
+                    }
+                }
+            }
+            // for (let j = 0; j < this.width; j++) {
+
+            //     data[(i * this.width + j) * 4] = this.pixels[i][j].r;
+            //     data[(i * this.width + j) * 4 + 1] = this.pixels[i][j].g;
+            //     data[(i * this.width + j) * 4 + 2] = this.pixels[i][j].b;
+            //     data[(i * this.width + j) * 4 + 3] = 255;
+            // }
+        }
+        return data;
+    }
 
     initPixels() {
         for (let i = 0; i < this.height; i++) {
