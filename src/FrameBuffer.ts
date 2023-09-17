@@ -19,6 +19,15 @@ class FrameBuffer {
         this.initPixels();
     }
 
+    public realWidth(pixelSize: number): number {
+        return this.width * pixelSize;
+    }
+
+    public realHeight(pixelSize: number): number {
+        return this.height * pixelSize;
+    }
+
+
     clear(r: number, g: number, b: number) {
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {

@@ -8,6 +8,7 @@ import ModelManager from './ModelManager'
 
 
 const modelManager = new ModelManager();
+const maxPixelSize = 7;
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -61,8 +62,34 @@ function App() {
           checked={drawBorder}
           onChange={(event) => setDrawBorder(event.target.checked)}
         />
-        <label htmlFor="border" style={{ fontSize: "10px" }}>
+        <label htmlFor="border" style={{ fontSize: "14px" }}>
           Draw Border
+        </label>
+      </div>
+    );
+  }
+
+  function onPixelSizeChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const slider = event.currentTarget;
+    const size = parseInt(slider.value);
+    setPixelSize(size);
+  }
+
+  // define a slider that goes from 1 to 5
+  function PixelSizeComponent() {
+    return (
+      <div>
+        <input
+          type="range"
+          id="pixelSize"
+          name="pixelSize"
+          min="1"
+          max={maxPixelSize.toString()}
+          value={pixelSize}
+          onChange={onPixelSizeChange}
+        />
+        <label htmlFor="pixelSize" style={{ fontSize: "14px" }}>
+          Pixel Size = {pixelSize}
         </label>
       </div>
     );
@@ -71,18 +98,29 @@ function App() {
 
 
   function bufferImage() {
-    const pixelSize = 4;
     const data = frame.getImageData(pixelSize);
     // now construct an image from the data
     const ctx = canvasRef.current?.getContext('2d');
-    if (ctx) {
-      const imageData = new ImageData(data, frame.width * pixelSize, frame.height * pixelSize);
-      ctx.putImageData(imageData, 0, 0);
+    // clear the canvas
 
+    if (ctx) {
+      // clear the canvas to a background color to mid black
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, canvasRef.current?.width || 0, canvasRef.current?.height || 0); // fill the entire canvas with black
+
+      const imageData = new ImageData(data, frame.width * pixelSize, frame.height * pixelSize);
+
+      const image_width = frame.width * pixelSize;
+      const image_height = frame.height * pixelSize;
+      // center the image on the canvas
+
+      const x_offset = (frame.width * maxPixelSize - image_width) / 2;
+      const y_offset = (frame.height * maxPixelSize - image_height) / 2;
+      ctx.putImageData(imageData, x_offset, y_offset);
 
     }
     return (
-      <canvas ref={canvasRef} width={frame.width * 4} height={frame.height * 4} />
+      <canvas ref={canvasRef} width={frame.width * maxPixelSize} height={frame.height * maxPixelSize} />
     );
   }
 
@@ -95,7 +133,7 @@ function App() {
         {bufferImage()}
         <ModelSelectionComponent />
         <BorderControlComponent />
-
+        <PixelSizeComponent />
       </header>
     </div>
   );
