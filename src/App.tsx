@@ -8,7 +8,7 @@ import ModelManager from './ModelManager'
 
 
 const modelManager = new ModelManager();
-const maxPixelSize = 7;
+const maxPixelSize = 4;
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
