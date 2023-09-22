@@ -309,8 +309,9 @@ class GeometricProcessor {
      * @param frameBuffer
      * @param width
      */
-    static fillTriangles(dataBuffer: number[], numTriangles: number, frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
+    static fillTriangles(dataBuffer: number[], numVertices: number, frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
 
+        const numTriangles = numVertices / 3;
         for (let i = 0; i < numTriangles; i++) {
 
             const offset = i * 18; // 6 values per vertex, 3 vertices per triangle
@@ -369,11 +370,8 @@ class GeometricProcessor {
     }
 
 
-    static fillTriangleFan(dataBuffer: number[], frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
+    static fillTriangleFan(dataBuffer: number[], numVertices: number, frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
 
-
-
-        const numVertices = dataBuffer.length / 6;
         const numTriangles = numVertices - 2;
 
         const vertex0 = [dataBuffer[0], dataBuffer[1], dataBuffer[2]];
@@ -408,9 +406,9 @@ class GeometricProcessor {
      * @param borderColor 
      */
 
-    static fillTriangleStrip(dataBuffer: number[], frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
-        const num_vertices = dataBuffer.length / 6;
-        const num_triangles = num_vertices - 2;
+    static fillTriangleStrip(dataBuffer: number[], numVertices: number, frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
+
+        const numTriangles = numVertices - 2;
 
         // define the variables so we don not get undefined since there is an if in the loop.
         let vertex0 = [dataBuffer[0], dataBuffer[1], dataBuffer[2]];
@@ -421,7 +419,7 @@ class GeometricProcessor {
         let color1 = color0;
         let color2 = color0;
 
-        for (let i = 0; i < num_triangles; i++) {
+        for (let i = 0; i < numTriangles; i++) {
             let index = i * 6;
             let index0 = index;
             let index1 = index + 6;

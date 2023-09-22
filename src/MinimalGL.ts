@@ -3,11 +3,10 @@
  * in a 3D rendering pipeline.
  */
 
-import { get } from "http";
 import Color from "./Color";
 import FrameBuffer from "./FrameBuffer";
 import GeometricProcessor from "./GeometricProcessor";
-
+import { mat4 } from "gl-matrix";
 // types for drawArrays
 export enum PRIM {
     POINTS,
@@ -22,6 +21,11 @@ export const GL_COLOR_BUFFER_BIT = 0x00004000;
 export const GL_DEPTH_BUFFER_BIT = 0x00000100;
 export const GL_STENCIL_BUFFER_BIT = 0x00000400;
 
+export class MatricesGL {
+    toDevice: mat4 = mat4.identity(mat4.create());
+}
+
+
 
 
 export class GL {
@@ -34,9 +38,12 @@ export class GL {
     _inputColorSize: number = 3;
     _stride: number = 6;
     _backgroundColor: Color = new Color(0, 0, 0);
+    _matrices: MatricesGL = new MatricesGL();
+
+    //* the matrices that will be used for the transformations
     // a function that takes an array of numbers and returns an array of numbers
     // this is the default vertex shader
-    _vertexShader: ((data: number[]) => number[]) | null = null;
+    _vertexShader: ((data: number[], matrices: MatricesGL) => number[]) | null = null;
 
 
     constructor(frameBuffer: FrameBuffer) {
@@ -51,12 +58,30 @@ export class GL {
         this._indexBuffer = data;
     }
 
-    setVertexShader(shader: (data: number[]) => number[]) {
+    setVertexShader(shader: (data: number[], matrices: MatricesGL) => number[]) {
         this._vertexShader = shader;
     }
 
     setBackgroundColor(r: number, g: number, b: number) {
         this._backgroundColor = new Color(r, g, b);
+    }
+
+    setViewport(x: number, y: number, width: number, height: number) {
+        this._matrices.toDevice = mat4.create();
+
+        // scale from 2 to width, height
+        mat4.translate(this._matrices.toDevice, this._matrices.toDevice, [x, y, 0]);
+        mat4.translate(this._matrices.toDevice, this._matrices.toDevice, [width / 2, height / 2, 0]);
+        mat4.scale(this._matrices.toDevice, this._matrices.toDevice, [width / 2, -height / 2, 1]);
+
+
+
+        // flip the y axis
+        //mat4.scale(this._matrices.toDevice, this._matrices.toDevice, [1, -1, 1]);
+        // translate to the origin
+        //mat4.translate(this._matrices.toDevice, this._matrices.toDevice, [0, -height, 0]);
+
+
     }
 
 
@@ -70,7 +95,7 @@ export class GL {
     }
 
 
-    drawArrays(primitive: PRIM) {
+    drawArrays(primitive: PRIM, numVertices: number) {
         // get the vertex shader
         let vertexShader = this._vertexShader;
         if (vertexShader === null) {
@@ -88,26 +113,28 @@ export class GL {
         // get the data buffer
         let dataBuffer = this._dataBuffer;
 
-        const numVertices = dataBuffer.length / this._stride;
+
         let resultingDataBuffer: number[] = [];
 
         for (let vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
             let vertexData = getVertex.call(this, vertexIndex);
             let colorData = getColor.call(this, vertexIndex);
 
-            let transformedVertex = vertexShader(vertexData);
+            let transformedVertex = vertexShader(vertexData, this._matrices);
             resultingDataBuffer = resultingDataBuffer.concat(transformedVertex);
             resultingDataBuffer = resultingDataBuffer.concat(colorData);
         }
 
         if (primitive == PRIM.TRIANGLES) {
-            GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices / 3, this._frameBuffer, true, new Color(255, 0, 0));
+            GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices, this._frameBuffer, true, new Color(255, 0, 0));
         }
         if (primitive == PRIM.TRIANGLE_STRIP) {
-            GeometricProcessor.fillTriangleStrip(resultingDataBuffer, this._frameBuffer, true, new Color(10, 10, 10));
+            GeometricProcessor.fillTriangleStrip(resultingDataBuffer, numVertices, this._frameBuffer, true, new Color(10, 10, 10));
         }
 
-
+        if (primitive == PRIM.TRIANGLE_FAN) {
+            GeometricProcessor.fillTriangleFan(resultingDataBuffer, numVertices, this._frameBuffer, true, new Color(10, 10, 10));
+        }
 
     }
 

@@ -4,7 +4,7 @@ import Color from './Color';
 import FrameBuffer from './FrameBuffer'
 import FrameBufferComponent from './FrameBufferComponent'
 import GeometricProcessor from './GeometricProcessor'
-import ModelManager from './ModelManager'
+import { ModelManager } from './ModelManager'
 import { GL } from './MinimalGL'
 import RenderTest from './RenderTest';
 
@@ -103,6 +103,8 @@ function App() {
     );
   }
   const renderer = new RenderTest(frame);
+
+  renderer.render(selectedModel);
 
   /** 
    * Get the image from the frame buffer and draw it on the canvas

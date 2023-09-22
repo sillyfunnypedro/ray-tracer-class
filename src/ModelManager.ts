@@ -9,62 +9,54 @@ import FrameBuffer from "./FrameBuffer";
 import { GL } from "./MinimalGL";
 import Color from "./Color";
 
+export class Model {
+    vertices: number[];
+    indices: number[];
+    numVertices: number;
 
-class ModelManager {
 
-    /** 
-     * A map of strings to functions that take a frame buffer and draw a model
-     * 
-     */
-    modelTesters = new Map<string, (frame: FrameBuffer, drawBorder: boolean, borderColor: Color) => void>();
+    constructor(vertices: number[], indices: number[], numVertices: number) {
+        this.vertices = vertices;
+        this.indices = indices;
+        this.numVertices = numVertices;
+    }
+}
 
+
+export class ModelManager {
+
+
+    models: string[] = [
+        "triangleStrip",
+        "triangleFan",
+        //        "meshIndex",
+        "triangleMesh"
+    ];
 
 
     constructor() {
-        this.modelTesters.set("meshIndex", this.generateTrianglesIndex);
-        this.modelTesters.set("meshTriangles", this.generateTriangles);
-        this.modelTesters.set("triangleFan", this.generateTriangleFan);
-        this.modelTesters.set("triangleStrip", this.renderTriangleStrip);
+
+
 
 
     }
 
     getModels(): string[] {
-        return Array.from(this.modelTesters.keys());
+        return this.models;
     }
 
-    getModel(model: string, width: number, height: number): number[] {
+    getModel(model: string, width: number, height: number): Model {
         switch (model) {
             case "triangleStrip":
                 return this.generateTriangleStrip(width, height);
-            default:
-                return [];
-        }
-
-    }
-
-    drawModel(model: string, frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
-        // const drawFunction = this.modelTesters.get(model);
-        // if (drawFunction) {
-        //     frame.clear(129, 128, 128);
-        //     drawFunction(frame, drawBorder, borderColor);
-        // }
-        switch (model) {
-            case "triangleStrip":
-                this.renderTriangleStrip(frame, drawBorder, borderColor);
-                break;
             case "triangleFan":
-                this.generateTriangleFan(frame, drawBorder, borderColor);
-                break;
-            case "meshIndex":
-                this.generateTrianglesIndex(frame, drawBorder, borderColor);
-                break;
-            case "meshTriangles":
-                this.generateTriangles(frame, drawBorder, borderColor);
-                break;
+                return this.generateTriangleFan(width, height);
+            case "triangleMesh":
+                return this.generateTriangles(width, height);
             default:
-                break;
+                return new Model([], [], 0);
         }
+
     }
 
     /**
@@ -80,12 +72,12 @@ class ModelManager {
      * The outer radius of the torus is defined by the variable outerRadius
      * see https://en.wikipedia.org/wiki/Triangle_strip
      */
-    private generateTriangleStrip(width: number, height: number): number[] {
-        const x = width / 2;
-        const y = height / 2;
+    private generateTriangleStrip(width: number, height: number): Model {
+        const x = 0;
+        const y = 0;
 
-        const innerRadius = 40;
-        const outerRadius = 80;
+        const innerRadius = 0.2;
+        const outerRadius = 0.6;
 
         let numSegments = 18; // each segment has two triangles
         const colors: Color[] = [
@@ -103,8 +95,8 @@ class ModelManager {
 
 
         for (let i = 0; i < numSegments; i++) {
-            const currAngle = i * angleStep;
-            const nextAngle = (i + 1) * angleStep;
+            const currAngle = -i * angleStep;
+            const nextAngle = -(i + 1) * angleStep;
 
             const x0 = x + innerRadius * Math.cos(currAngle);
             const y0 = y + innerRadius * Math.sin(currAngle);
@@ -146,18 +138,13 @@ class ModelManager {
             vertices.push(Math.floor(colors[i % 3].b));
 
         }
-        return vertices;
-
-
+        let result: Model = {
+            vertices: vertices,
+            indices: [],
+            numVertices: numSegments * 2 + 2
+        };
+        return result;
     }
-
-    private renderTriangleStrip(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
-        const vertices = this.generateTriangleStrip(frame.width, frame.height);
-        GeometricProcessor.fillTriangleStrip(vertices, frame, drawBorder, borderColor);
-    }
-
-
-
 
 
 
@@ -170,10 +157,10 @@ class ModelManager {
      * Draw a triangle fan to test the drawTriangleFan function
      * The colors of the outside vertices alternate between color1 and color2
      */
-    private generateTriangleFan(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
-        const x = 10;
-        const y = frame.height - 10;
-        const r = 150;
+    private generateTriangleFan(width: number, height: number): Model {
+        const x = -0.9;
+        const y = -0.9;
+        const r = 1.2;
         const numTriangles = 5;
         const color0 = new Color(255, 0, 0);
         const color1 = new Color(0, 255, 0);
@@ -198,7 +185,7 @@ class ModelManager {
             if (i % 2 === 0) {
                 color = color2;
             }
-            const angle = -s * Math.PI / 2;
+            const angle = s * Math.PI / 2;
             const x1 = x + r * Math.cos(angle);
             const y1 = y + r * Math.sin(angle);
             vertices.push(x1);
@@ -209,7 +196,12 @@ class ModelManager {
             vertices.push(Math.floor(color.b));
         }
 
-        GeometricProcessor.fillTriangleFan(vertices, frame, drawBorder, borderColor);
+        let result: Model = {
+            vertices: vertices,
+            indices: [],
+            numVertices: numTriangles + 2
+        };
+        return result;
 
     }
 
@@ -275,12 +267,12 @@ class ModelManager {
      * Draw a mesh to test the drawTriangles function
      * @param frame 
      */
-    private generateTriangles(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
+    private generateTriangles(width: number, height: number): Model {
         // you can change the constants here to change the look of the mesh
-        const x = 10;
-        const y = 10;
-        const w = 180;
-        const h = 100;
+        const x = -0.9;
+        const y = -0.9;
+        const w = 1.8;
+        const h = 1.8;
         const x_steps = 1;
         const y_steps = 1;
         const x_step = w / x_steps;
@@ -332,9 +324,6 @@ class ModelManager {
                 let vertexIndex = i * (y_steps + 1) + j;
                 pushVertex(vertexIndex);
 
-                //indices.push(i * (y_steps + 1) + j + 1);
-                vertexIndex = i * (y_steps + 1) + j + 1;
-                pushVertex(vertexIndex);
 
 
                 //indices.push((i + 1) * (y_steps + 1) + j);
@@ -343,21 +332,33 @@ class ModelManager {
 
                 //indices.push(i * (y_steps + 1) + j + 1);
                 vertexIndex = i * (y_steps + 1) + j + 1;
+                pushVertex(vertexIndex);
+
+
+                //indices.push(i * (y_steps + 1) + j + 1);
+                vertexIndex = i * (y_steps + 1) + j + 1;
+                pushVertex(vertexIndex);
+
+
+
+                //indices.push((i + 1) * (y_steps + 1) + j);
+                vertexIndex = (i + 1) * (y_steps + 1) + j;
                 pushVertex(vertexIndex);
 
                 //indices.push((i + 1) * (y_steps + 1) + j + 1);
                 vertexIndex = (i + 1) * (y_steps + 1) + j + 1;
                 pushVertex(vertexIndex);
 
-                //indices.push((i + 1) * (y_steps + 1) + j);
-                vertexIndex = (i + 1) * (y_steps + 1) + j;
-                pushVertex(vertexIndex);
-
                 numTriangles += 2;
             }
         }
+        let result: Model = {
+            vertices: vertices,
+            indices: [],
+            numVertices: numTriangles * 3
+        };
 
-        GeometricProcessor.fillTriangles(vertices, numTriangles, frame, drawBorder, borderColor);
+        return result;
     }
 }
 
@@ -365,4 +366,4 @@ class ModelManager {
 
 
 
-export default ModelManager;
+
