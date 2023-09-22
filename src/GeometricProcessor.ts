@@ -1,3 +1,4 @@
+import { off } from "process";
 import Color from "./Color";
 import FrameBuffer from "./FrameBuffer";
 
@@ -172,6 +173,19 @@ class GeometricProcessor {
         x2 = Math.round(x2);
         y2 = Math.round(y2);
 
+        // Calculate the z component of cross product of the vectors (x1-x0, y1-y0) and (x2-x0, y2-y0)
+        // This will be positive if the winding order is counter clockwise
+        // This will be negative if the winding order is clockwise
+        // we are in screen space so the we want clockwise as the front
+        const crossProduct = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0);
+
+        // if the cross product is negative then set all colors to [30, 30, 30]
+        if (crossProduct > 0) {
+            color0 = new Color(30, 30, 30);
+            color1 = new Color(30, 30, 30);
+            color2 = new Color(30, 30, 30);
+        }
+
 
         let a, b, y, last;
         let color_a: Color = color0;
@@ -289,13 +303,46 @@ class GeometricProcessor {
 
     /**
      * Draw an array of triangles defined by a data buffer.  each vertex is defined by 3 floats (x,y,z) and 3 floats for the color (r,g,b)
+     * the triangles are defined by three sets of data in a row, this does not use indexBuffers
+     * The z values are ignored for now.
+     * @param dataBuffer
+     * @param frameBuffer
+     * @param width
+     */
+    static fillTriangles(dataBuffer: number[], numTriangles: number, frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
+
+        for (let i = 0; i < numTriangles; i++) {
+
+            const offset = i * 18; // 6 values per vertex, 3 vertices per triangle
+            let vertex0 = [dataBuffer[offset], dataBuffer[offset + 1], dataBuffer[offset + 2]];
+            let vertex1 = [dataBuffer[offset + 6], dataBuffer[offset + 7], dataBuffer[offset + 8]];
+            let vertex2 = [dataBuffer[offset + 12], dataBuffer[offset + 13], dataBuffer[offset + 14]];
+
+            let color0 = new Color(dataBuffer[offset + 3], dataBuffer[offset + 4], dataBuffer[offset + 5]);
+            let color1 = new Color(dataBuffer[offset + 9], dataBuffer[offset + 10], dataBuffer[offset + 11]);
+            let color2 = new Color(dataBuffer[offset + 15], dataBuffer[offset + 16], dataBuffer[offset + 17]);
+
+
+
+            GeometricProcessor.fillTriangleColor(vertex0[0], vertex0[1], vertex1[0], vertex1[1], vertex2[0], vertex2[1], color0, color1, color2, frameBuffer);
+
+            if (drawBorder) {
+                GeometricProcessor.drawLine(vertex0[0], vertex0[1], vertex1[0], vertex1[1], borderColor, frameBuffer);
+                GeometricProcessor.drawLine(vertex0[0], vertex0[1], vertex2[0], vertex2[1], borderColor, frameBuffer);
+                GeometricProcessor.drawLine(vertex1[0], vertex1[1], vertex2[0], vertex2[1], borderColor, frameBuffer);
+            }
+        }
+    }
+
+    /**
+     * Draw an array of triangles defined by a data buffer.  each vertex is defined by 3 floats (x,y,z) and 3 floats for the color (r,g,b)
      * the triangles are defined by an array of indices three per triangle
      * The z values are ignored for now.
      * @param dataBuffer
      * @param frameBuffer
      * @param width
      */
-    static fillTriangles(dataBuffer: number[], indexBuffer: number[], numTriangles: number, frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
+    static fillTrianglesIndex(dataBuffer: number[], indexBuffer: number[], numTriangles: number, frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
 
         for (let i = 0; i < numTriangles; i++) {
             let index = i * 3;
@@ -320,6 +367,7 @@ class GeometricProcessor {
             }
         }
     }
+
 
     static fillTriangleFan(dataBuffer: number[], frameBuffer: FrameBuffer, drawBorder: boolean, borderColor: Color) {
 
