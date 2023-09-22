@@ -34,9 +34,16 @@ class FrameBuffer {
                 this.pixels[i][j].r = r;
                 this.pixels[i][j].g = g;
                 this.pixels[i][j].b = b;
-                this.zBuffer[i][j] = 0;
             }
 
+        }
+    }
+
+    clearZBuffer() {
+        for (let i = 0; i < this.height; i++) {
+            for (let j = 0; j < this.width; i++) {
+                this.zBuffer[i][j] = 0;
+            }
         }
     }
 

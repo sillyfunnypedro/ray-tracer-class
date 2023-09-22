@@ -5,6 +5,8 @@ import FrameBuffer from './FrameBuffer'
 import FrameBufferComponent from './FrameBufferComponent'
 import GeometricProcessor from './GeometricProcessor'
 import ModelManager from './ModelManager'
+import { GL } from './MinimalGL'
+import RenderTest from './RenderTest';
 
 
 const modelManager = new ModelManager();
@@ -20,6 +22,7 @@ function App() {
   const [pixelSize, setPixelSize] = useState(4);
 
 
+
   // a call back to set the model to draw
 
   function setModel(event: React.MouseEvent<HTMLButtonElement>): void {
@@ -32,7 +35,8 @@ function App() {
 
   // make sure the render happens on start up.
   useEffect(() => {
-    setSelectedModel("mesh");
+    const modelNames = modelManager.getModels();
+    setSelectedModel(modelNames[0]);
   }, []);
 
 
@@ -98,7 +102,7 @@ function App() {
       </div>
     );
   }
-
+  const renderer = new RenderTest(frame);
 
   /** 
    * Get the image from the frame buffer and draw it on the canvas
@@ -132,7 +136,7 @@ function App() {
   }
 
   // draw the model
-  modelManager.drawModel(selectedModel, frame, drawBorder, borderColor);
+  // modelManager.drawModel(selectedModel, frame, drawBorder, borderColor);
 
   return (
     <div className="App">

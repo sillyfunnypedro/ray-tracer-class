@@ -6,6 +6,7 @@
  */
 import GeometricProcessor from "./GeometricProcessor";
 import FrameBuffer from "./FrameBuffer";
+import { GL } from "./MinimalGL";
 import Color from "./Color";
 
 
@@ -15,24 +16,54 @@ class ModelManager {
      * A map of strings to functions that take a frame buffer and draw a model
      * 
      */
-    models = new Map<string, (frame: FrameBuffer, drawBorder: boolean, borderColor: Color) => void>();
+    modelTesters = new Map<string, (frame: FrameBuffer, drawBorder: boolean, borderColor: Color) => void>();
+
+
 
     constructor() {
-        this.models.set("meshIndex", this.generateTrianglesIndex);
-        this.models.set("meshTriangles", this.generateTriangles);
-        this.models.set("triangleFan", this.generateTriangleFan);
-        this.models.set("triangleStrip", this.generateTriangleStrip);
+        this.modelTesters.set("meshIndex", this.generateTrianglesIndex);
+        this.modelTesters.set("meshTriangles", this.generateTriangles);
+        this.modelTesters.set("triangleFan", this.generateTriangleFan);
+        this.modelTesters.set("triangleStrip", this.renderTriangleStrip);
+
+
     }
 
     getModels(): string[] {
-        return Array.from(this.models.keys());
+        return Array.from(this.modelTesters.keys());
+    }
+
+    getModel(model: string, width: number, height: number): number[] {
+        switch (model) {
+            case "triangleStrip":
+                return this.generateTriangleStrip(width, height);
+            default:
+                return [];
+        }
+
     }
 
     drawModel(model: string, frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
-        const drawFunction = this.models.get(model);
-        if (drawFunction) {
-            frame.clear(129, 128, 128);
-            drawFunction(frame, drawBorder, borderColor);
+        // const drawFunction = this.modelTesters.get(model);
+        // if (drawFunction) {
+        //     frame.clear(129, 128, 128);
+        //     drawFunction(frame, drawBorder, borderColor);
+        // }
+        switch (model) {
+            case "triangleStrip":
+                this.renderTriangleStrip(frame, drawBorder, borderColor);
+                break;
+            case "triangleFan":
+                this.generateTriangleFan(frame, drawBorder, borderColor);
+                break;
+            case "meshIndex":
+                this.generateTrianglesIndex(frame, drawBorder, borderColor);
+                break;
+            case "meshTriangles":
+                this.generateTriangles(frame, drawBorder, borderColor);
+                break;
+            default:
+                break;
         }
     }
 
@@ -49,9 +80,9 @@ class ModelManager {
      * The outer radius of the torus is defined by the variable outerRadius
      * see https://en.wikipedia.org/wiki/Triangle_strip
      */
-    private generateTriangleStrip(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
-        const x = frame.width / 2;
-        const y = frame.height / 2;
+    private generateTriangleStrip(width: number, height: number): number[] {
+        const x = width / 2;
+        const y = height / 2;
 
         const innerRadius = 40;
         const outerRadius = 80;
@@ -115,9 +146,14 @@ class ModelManager {
             vertices.push(Math.floor(colors[i % 3].b));
 
         }
+        return vertices;
 
+
+    }
+
+    private renderTriangleStrip(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
+        const vertices = this.generateTriangleStrip(frame.width, frame.height);
         GeometricProcessor.fillTriangleStrip(vertices, frame, drawBorder, borderColor);
-
     }
 
 
