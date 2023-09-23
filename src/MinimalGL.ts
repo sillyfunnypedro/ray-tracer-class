@@ -26,7 +26,7 @@ export class MatricesGL {
 }
 
 export class FragmentGL {
-    color: Color = new Color(0, 0, 0);
+    color: number[] = [];
     uv: number[] = [];
     normal: number[] = [];
     fromEye: number[] = [];
@@ -57,6 +57,10 @@ export class GL {
     _textureSize: number = 0;
     _textureOffset: number = 0;
 
+    // Non openGL stuff for our demo
+    _drawBorder: boolean = false;
+    _borderColor: Color = new Color(0, 0, 0);
+
     //* the matrices that will be used for the transformations
     // a function that takes an array of numbers and returns an array of numbers
     // this is the default vertex shader
@@ -83,6 +87,7 @@ export class GL {
 
     setFragmentShader(shader: (data: FragmentGL) => number[]) {
         this._fragmentShader = shader;
+        GeometricProcessor.fragmentShader = shader;
     }
 
     setBackgroundColor(r: number, g: number, b: number) {
@@ -123,6 +128,15 @@ export class GL {
 
     setStride(stride: number) {
         this._stride = stride;
+    }
+
+    // non openGL stuff for our demo
+    setDrawBorder(drawBorder: boolean) {
+        this._drawBorder = drawBorder;
+    }
+
+    setBorderColor(r: number, g: number, b: number) {
+        this._borderColor = new Color(r, g, b);
     }
 
 
@@ -197,14 +211,14 @@ export class GL {
         }
 
         if (primitive == PRIM.TRIANGLES) {
-            GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices, this._frameBuffer, true, new Color(10, 10, 10));
+            GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices, this._frameBuffer, this._drawBorder, this._borderColor);
         }
         if (primitive == PRIM.TRIANGLE_STRIP) {
-            GeometricProcessor.fillTriangleStrip(resultingDataBuffer, numVertices, this._frameBuffer, true, new Color(10, 10, 10));
+            GeometricProcessor.fillTriangleStrip(resultingDataBuffer, numVertices, this._frameBuffer, this._drawBorder, this._borderColor);
         }
 
         if (primitive == PRIM.TRIANGLE_FAN) {
-            GeometricProcessor.fillTriangleFan(resultingDataBuffer, numVertices, this._frameBuffer, true, new Color(10, 10, 10));
+            GeometricProcessor.fillTriangleFan(resultingDataBuffer, numVertices, this._frameBuffer, this._drawBorder, this._borderColor);
         }
 
     }

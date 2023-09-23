@@ -39,6 +39,10 @@ class Color {
         return `#${rHex}${gHex}${bHex}`;
     }
 
+    toArray(): number[] {
+        return [this.r, this.g, this.b, this.a];
+    }
+
     static interpolate(color0: Color, color1: Color, t: number) {
         return new Color(
 

@@ -18,7 +18,7 @@ function App() {
   const [frame, setFrame] = useState(new FrameBuffer(320, 200));
   const [drawBorder, setDrawBorder] = useState(true);
   const [selectedModel, setSelectedModel] = useState("");
-  const [borderColor, setBorderColor] = useState(new Color(20, 20, 20));
+  const [borderColor, setBorderColor] = useState([10, 10, 10]);
   const [pixelSize, setPixelSize] = useState(4);
 
 
@@ -102,7 +102,7 @@ function App() {
       </div>
     );
   }
-  const renderer = new RenderTest(frame);
+  const renderer = new RenderTest(frame, drawBorder, borderColor);
 
   renderer.render(selectedModel);
 

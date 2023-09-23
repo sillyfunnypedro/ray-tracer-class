@@ -1,11 +1,14 @@
 import { off } from "process";
 import Color from "./Color";
 import FrameBuffer from "./FrameBuffer";
+import { FragmentGL } from "./MinimalGL";
 
 
 
 class GeometricProcessor {
     // draw a line using breseham algorithm
+    static fragmentShader: ((data: FragmentGL) => number[]) | null = null;
+
 
     static drawLine(x0: number, y0: number, x1: number, y1: number, color: Color, frameBuffer: FrameBuffer) {
         // Make sure that all the coordinates are integers
@@ -72,7 +75,15 @@ class GeometricProcessor {
             else {
                 t = (i - x0) / dx;
             }
-            const color = Color.interpolate(color0, color1, t);
+            let color = Color.interpolate(color0, color1, t);
+
+            const fragParameters = new FragmentGL();
+            fragParameters.color = color.toArray();
+
+            if (GeometricProcessor.fragmentShader !== null) {
+                let newColor = GeometricProcessor.fragmentShader(fragParameters);
+                color = new Color(newColor[0], newColor[1], newColor[2], newColor[3]);
+            }
             frameBuffer.setPixel(i, y, color);
         }
     }

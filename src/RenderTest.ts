@@ -6,7 +6,19 @@ import { mat4, vec4 } from 'gl-matrix'
 
 function defaultFragmentShader(fragParameters: FragmentGL): number[] {
     let result = fragParameters.color;
-    return [result.r, result.g, result.b, 255];
+    return result;
+}
+
+function grayFragmentShader(fragParameters: FragmentGL): number[] {
+    // compute the gray colour according to the formula
+    let r = fragParameters.color[0];
+    let g = fragParameters.color[1];
+    let b = fragParameters.color[2];
+
+    let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    let result = [gray, gray, gray, fragParameters.color[3]];
+    return result;
 }
 
 function defaultVertexShader(vertex: number[], matrices: MatricesGL): number[] {
@@ -24,15 +36,20 @@ function defaultVertexShader(vertex: number[], matrices: MatricesGL): number[] {
 }
 
 
+
+
 class RenderTest {
 
     frameBuffer: FrameBuffer;
     modelManager: ModelManager = new ModelManager();
+    drawBorder: boolean;
+    borderColorArray: number[];
 
 
-    constructor(frameBuffer: FrameBuffer) {
+    constructor(frameBuffer: FrameBuffer, drawBorder: boolean, borderColorArray: number[]) {
         this.frameBuffer = frameBuffer;
-
+        this.drawBorder = drawBorder;
+        this.borderColorArray = borderColorArray;
     }
 
     render(modelName: string) {
@@ -71,7 +88,10 @@ class RenderTest {
         gl.setVertexShader(defaultVertexShader);
 
         // here is our fragment shader
-        gl.setFragmentShader(defaultFragmentShader);
+        gl.setFragmentShader(grayFragmentShader);
+
+        gl.setDrawBorder(this.drawBorder);
+        gl.setBorderColor(this.borderColorArray[0], this.borderColorArray[1], this.borderColorArray[2]);
 
 
         // make the viewport square
