@@ -88,7 +88,7 @@ class RenderTest {
         gl.setVertexShader(defaultVertexShader);
 
         // here is our fragment shader
-        gl.setFragmentShader(grayFragmentShader);
+        gl.setFragmentShader(defaultFragmentShader);
 
         gl.setDrawBorder(this.drawBorder);
         gl.setBorderColor(this.borderColorArray[0], this.borderColorArray[1], this.borderColorArray[2]);

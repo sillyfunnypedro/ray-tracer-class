@@ -194,9 +194,9 @@ class GeometricProcessor {
 
         // if the cross product is negative then set all colors to [30, 30, 30]
         if (crossProduct > 0) {
-            color0 = new Color(30, 30, 30);
-            color1 = new Color(30, 30, 30);
-            color2 = new Color(30, 30, 30);
+            color0 = new Color(255, 255, 255);
+            color1 = new Color(0, 0, 0);
+            color2 = new Color(0, 0, 0);
         }
 
 

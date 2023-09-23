@@ -262,14 +262,14 @@ export class ModelManager {
         const y = -0.7;
         const w = 1;
         const h = 1;
-        const x_steps = 10;
-        const y_steps = 10;
+        const x_steps = 20;
+        const y_steps = 20;
         const x_step = w / x_steps;
         const y_step = h / y_steps;
         const color0 = new Color(255, 0, 0);
-        const color1 = new Color(0, 255, 0);
+        const color1 = new Color(255, 0, 0);
         const color2 = new Color(0, 0, 255);
-        const color3 = new Color(255, 255, 0);
+        const color3 = new Color(0, 0, 255);
 
         const dataBuffer: number[] = [];
         let num_vertices = 0;
@@ -294,11 +294,12 @@ export class ModelManager {
         for (let i = 0; i < x_steps; i++) {
             for (let j = 0; j < y_steps; j++) {
                 indexBuffer.push(i * (y_steps + 1) + j);
-                indexBuffer.push(i * (y_steps + 1) + j + 1);
                 indexBuffer.push((i + 1) * (y_steps + 1) + j);
                 indexBuffer.push(i * (y_steps + 1) + j + 1);
+
+                indexBuffer.push(i * (y_steps + 1) + j + 1);
+                indexBuffer.push((i + 1) * (y_steps + 1) + j);
                 indexBuffer.push((i + 1) * (y_steps + 1) + j + 1);
-                indexBuffer.push((i + 1) * (y_steps + 1) + j);
                 numTriangles += 2;
             }
         }
