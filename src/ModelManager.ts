@@ -10,15 +10,43 @@ import { GL } from "./MinimalGL";
 import Color from "./Color";
 
 export class Model {
-    vertices: number[];
+    dataBuffer: number[];
+
+    vertexSize: number = 0;
+    vertexOffset: number = 0;
+
+    colorLength: number = 0;
+    colorOffset: number = 0;
+
+    textureLength: number = 0;
+    textureOffset: number = 0;
+
     indices: number[];
     numVertices: number;
 
 
-    constructor(vertices: number[], indices: number[], numVertices: number) {
-        this.vertices = vertices;
+    constructor(vertices: number[] = [],
+        vertexLength: number = 0,
+        vertexOffset: number = 0,
+        colorLength: number = 0,
+        colorOffset: number = 0,
+        textureLength: number = 0,
+        textureOffset: number = 0,
+        indices: number[] = [],
+        numVertices: number = 0
+    ) {
+        this.dataBuffer = vertices;
+        this.vertexSize = vertexLength;
+        this.vertexOffset = vertexOffset;
+        this.colorOffset = colorOffset;
+        this.colorLength = colorLength;
+        this.textureLength = textureLength;
+        this.textureOffset = textureOffset;
         this.indices = indices;
         this.numVertices = numVertices;
+    }
+    static emptyModel(): Model {
+        return new Model();
     }
 }
 
@@ -30,7 +58,8 @@ export class ModelManager {
         "triangleStrip",
         "triangleFan",
         //        "meshIndex",
-        "triangleMesh"
+        "triangleMesh",
+        "triangleMesh2d"
     ];
 
 
@@ -48,13 +77,15 @@ export class ModelManager {
     getModel(model: string, width: number, height: number): Model {
         switch (model) {
             case "triangleStrip":
-                return this.generateTriangleStrip(width, height);
+                return this.generateTriangleStrip();
             case "triangleFan":
-                return this.generateTriangleFan(width, height);
+                return this.generateTriangleFan();
             case "triangleMesh":
-                return this.generateTriangles(width, height);
+                return this.generateTriangles();
+            case "triangleMesh2d":
+                return this.generateTriangles2d();
             default:
-                return new Model([], [], 0);
+                return Model.emptyModel()
         }
 
     }
@@ -72,7 +103,7 @@ export class ModelManager {
      * The outer radius of the torus is defined by the variable outerRadius
      * see https://en.wikipedia.org/wiki/Triangle_strip
      */
-    private generateTriangleStrip(width: number, height: number): Model {
+    private generateTriangleStrip(): Model {
         const x = 0;
         const y = 0;
 
@@ -87,7 +118,7 @@ export class ModelManager {
         ];
 
 
-        const vertices: number[] = [];
+        const dataBuffer: number[] = [];
 
         const angleStep = 2 * Math.PI / numSegments;
 
@@ -109,40 +140,46 @@ export class ModelManager {
 
             if (i == 0) {
 
-                vertices.push(x0);
-                vertices.push(y0);
-                vertices.push(0);
-                vertices.push(Math.floor(colors[i % 3].r));
-                vertices.push(Math.floor(colors[i % 3].g));
-                vertices.push(Math.floor(colors[i % 3].b));
+                dataBuffer.push(x0);
+                dataBuffer.push(y0);
+                dataBuffer.push(0);
+                dataBuffer.push(Math.floor(colors[i % 3].r));
+                dataBuffer.push(Math.floor(colors[i % 3].g));
+                dataBuffer.push(Math.floor(colors[i % 3].b));
 
-                vertices.push(x1);
-                vertices.push(y1);
-                vertices.push(0);
-                vertices.push(Math.floor(colors[(i + 2) % 3].r));
-                vertices.push(Math.floor(colors[(i + 2) % 3].g));
-                vertices.push(Math.floor(colors[(i + 2) % 3].b));
+                dataBuffer.push(x1);
+                dataBuffer.push(y1);
+                dataBuffer.push(0);
+                dataBuffer.push(Math.floor(colors[(i + 2) % 3].r));
+                dataBuffer.push(Math.floor(colors[(i + 2) % 3].g));
+                dataBuffer.push(Math.floor(colors[(i + 2) % 3].b));
             }
-            vertices.push(x2);
-            vertices.push(y2);
-            vertices.push(0);
-            vertices.push(Math.floor(colors[(i + 1) % 3].r));
-            vertices.push(Math.floor(colors[(i + 1) % 3].g));
-            vertices.push(Math.floor(colors[(i + 1) % 3].b));
+            dataBuffer.push(x2);
+            dataBuffer.push(y2);
+            dataBuffer.push(0);
+            dataBuffer.push(Math.floor(colors[(i + 1) % 3].r));
+            dataBuffer.push(Math.floor(colors[(i + 1) % 3].g));
+            dataBuffer.push(Math.floor(colors[(i + 1) % 3].b));
 
-            vertices.push(x3);
-            vertices.push(y3);
-            vertices.push(0);
-            vertices.push(Math.floor(colors[i % 3].r));
-            vertices.push(Math.floor(colors[i % 3].g));
-            vertices.push(Math.floor(colors[i % 3].b));
+            dataBuffer.push(x3);
+            dataBuffer.push(y3);
+            dataBuffer.push(0);
+            dataBuffer.push(Math.floor(colors[i % 3].r));
+            dataBuffer.push(Math.floor(colors[i % 3].g));
+            dataBuffer.push(Math.floor(colors[i % 3].b));
 
         }
-        let result: Model = {
-            vertices: vertices,
-            indices: [],
-            numVertices: numSegments * 2 + 2
-        };
+
+
+        let result: Model = new Model();
+        result.dataBuffer = dataBuffer;
+        result.vertexSize = 3;
+        result.vertexOffset = 0;
+        result.colorLength = 3;
+        result.colorOffset = 3;
+        result.numVertices = numSegments * 2 + 2;
+
+
         return result;
     }
 
@@ -157,7 +194,7 @@ export class ModelManager {
      * Draw a triangle fan to test the drawTriangleFan function
      * The colors of the outside vertices alternate between color1 and color2
      */
-    private generateTriangleFan(width: number, height: number): Model {
+    private generateTriangleFan(): Model {
         const x = -0.9;
         const y = -0.9;
         const r = 1.2;
@@ -167,16 +204,16 @@ export class ModelManager {
         const color2 = new Color(0, 0, 255);
 
 
-        const vertices: number[] = [];
+        const dataBuffer: number[] = [];
 
 
-        vertices.push(x);
-        vertices.push(y);
-        vertices.push(0);
+        dataBuffer.push(x);
+        dataBuffer.push(y);
+        dataBuffer.push(0);
 
-        vertices.push(Math.floor(color0.r));
-        vertices.push(Math.floor(color0.g));
-        vertices.push(Math.floor(color0.b));
+        dataBuffer.push(Math.floor(color0.r));
+        dataBuffer.push(Math.floor(color0.g));
+        dataBuffer.push(Math.floor(color0.b));
 
         for (let i = 0; i < numTriangles + 1; i++) {
             const s = i / numTriangles;
@@ -188,19 +225,23 @@ export class ModelManager {
             const angle = s * Math.PI / 2;
             const x1 = x + r * Math.cos(angle);
             const y1 = y + r * Math.sin(angle);
-            vertices.push(x1);
-            vertices.push(y1);
-            vertices.push(0);
-            vertices.push(Math.floor(color.r));
-            vertices.push(Math.floor(color.g));
-            vertices.push(Math.floor(color.b));
+            dataBuffer.push(x1);
+            dataBuffer.push(y1);
+            dataBuffer.push(0);
+            dataBuffer.push(Math.floor(color.r));
+            dataBuffer.push(Math.floor(color.g));
+            dataBuffer.push(Math.floor(color.b));
         }
 
-        let result: Model = {
-            vertices: vertices,
-            indices: [],
-            numVertices: numTriangles + 2
-        };
+        let result: Model = new Model();
+        result.dataBuffer = dataBuffer;
+        result.vertexSize = 3;
+        result.vertexOffset = 0;
+        result.colorLength = 3;
+        result.colorOffset = 3;
+        result.numVertices = numTriangles
+
+
         return result;
 
     }
@@ -267,7 +308,7 @@ export class ModelManager {
      * Draw a mesh to test the drawTriangles function
      * @param frame 
      */
-    private generateTriangles(width: number, height: number): Model {
+    private generateTriangles(): Model {
         // you can change the constants here to change the look of the mesh
         const x = -0.9;
         const y = -0.9;
@@ -283,8 +324,8 @@ export class ModelManager {
         const color3 = new Color(255, 255, 0);
 
         const tmpVertices: number[] = [];
-        let num_vertices = 0;
-        let vertices: number[] = [];
+        let numVertices = 0;
+        let dataBuffer: number[] = [];
         for (let i = 0; i < x_steps + 1; i++) {
             for (let j = 0; j < y_steps + 1; j++) {
                 const s = i / x_steps;
@@ -296,7 +337,7 @@ export class ModelManager {
                 tmpVertices.push(Math.floor(color.r));
                 tmpVertices.push(Math.floor(color.g));
                 tmpVertices.push(Math.floor(color.b));
-                num_vertices += 1;
+                numVertices += 1;
             }
         }
 
@@ -308,12 +349,12 @@ export class ModelManager {
 
         function pushVertex(index: number) {
             index *= 6;
-            vertices.push(tmpVertices[index]);  // x
-            vertices.push(tmpVertices[index + 1]); //y
-            vertices.push(tmpVertices[index + 2]); //z
-            vertices.push(tmpVertices[index + 3]); //r
-            vertices.push(tmpVertices[index + 4]); //g
-            vertices.push(tmpVertices[index + 5]); //b
+            dataBuffer.push(tmpVertices[index]);  // x
+            dataBuffer.push(tmpVertices[index + 1]); //y
+            dataBuffer.push(tmpVertices[index + 2]); //z
+            dataBuffer.push(tmpVertices[index + 3]); //r
+            dataBuffer.push(tmpVertices[index + 4]); //g
+            dataBuffer.push(tmpVertices[index + 5]); //b
         }
 
         for (let i = 0; i < x_steps; i++) {
@@ -352,11 +393,109 @@ export class ModelManager {
                 numTriangles += 2;
             }
         }
-        let result: Model = {
-            vertices: vertices,
-            indices: [],
-            numVertices: numTriangles * 3
-        };
+        let result: Model = new Model();
+        result.dataBuffer = dataBuffer;
+        result.vertexSize = 3;
+        result.vertexOffset = 0;
+        result.colorLength = 3;
+        result.colorOffset = 3;
+        result.numVertices = numTriangles * 3;
+
+        return result;
+    }
+
+    /**
+     * Draw a mesh to test the drawTriangles function
+     * @param frame 
+     */
+    private generateTriangles2d(): Model {
+        // you can change the constants here to change the look of the mesh
+        const x = -0.9;
+        const y = -0.9;
+        const w = 1.8;
+        const h = 1.8;
+        const x_steps = 1;
+        const y_steps = 1;
+        const x_step = w / x_steps;
+        const y_step = h / y_steps;
+        const color0 = new Color(255, 0, 0);
+        const color1 = new Color(0, 255, 0);
+        const color2 = new Color(0, 0, 255);
+        const color3 = new Color(255, 255, 0);
+
+        const tmpVertices: number[] = [];
+        let numVertices = 0;
+        let dataBuffer: number[] = [];
+        for (let i = 0; i < x_steps + 1; i++) {
+            for (let j = 0; j < y_steps + 1; j++) {
+                const s = i / x_steps;
+                const t = j / y_steps;
+                const color = Color.interpolate2d(color0, color1, color2, color3, s, t);
+                tmpVertices.push(x + i * x_step);
+                tmpVertices.push(y + j * y_step);
+                tmpVertices.push(Math.floor(color.r));
+                tmpVertices.push(Math.floor(color.g));
+                tmpVertices.push(Math.floor(color.b));
+                numVertices += 1;
+            }
+        }
+
+        const indices: number[] = [];
+        let numTriangles = 0;
+
+
+        // use the same scheme to generate the triangles as in the generateTrianglesIndex function
+
+        function pushVertex(index: number) {
+            index *= 5;
+            dataBuffer.push(tmpVertices[index]);  // x
+            dataBuffer.push(tmpVertices[index + 1]); //y
+            dataBuffer.push(tmpVertices[index + 2]); //r
+            dataBuffer.push(tmpVertices[index + 3]); //g
+            dataBuffer.push(tmpVertices[index + 4]); //b
+        }
+
+        for (let i = 0; i < x_steps; i++) {
+            for (let j = 0; j < y_steps; j++) {
+                // Need to generate two triangles here
+                // Triangle 1
+                //indices.push(i * (y_steps + 1) + j);
+                let vertexIndex = i * (y_steps + 1) + j;
+                pushVertex(vertexIndex);
+
+                //indices.push((i + 1) * (y_steps + 1) + j);
+                vertexIndex = (i + 1) * (y_steps + 1) + j;
+                pushVertex(vertexIndex);
+
+                //indices.push(i * (y_steps + 1) + j + 1);
+                vertexIndex = i * (y_steps + 1) + j + 1;
+                pushVertex(vertexIndex);
+
+
+                //indices.push(i * (y_steps + 1) + j + 1);
+                vertexIndex = i * (y_steps + 1) + j + 1;
+                pushVertex(vertexIndex);
+
+
+
+                //indices.push((i + 1) * (y_steps + 1) + j);
+                vertexIndex = (i + 1) * (y_steps + 1) + j;
+                pushVertex(vertexIndex);
+
+                //indices.push((i + 1) * (y_steps + 1) + j + 1);
+                vertexIndex = (i + 1) * (y_steps + 1) + j + 1;
+                pushVertex(vertexIndex);
+
+                numTriangles += 2;
+            }
+        }
+        let result: Model = new Model();
+        result.dataBuffer = dataBuffer;
+        result.vertexSize = 2;
+        result.vertexOffset = 0;
+        result.colorLength = 3;
+        result.colorOffset = 2;
+        result.numVertices = numTriangles * 3;
 
         return result;
     }

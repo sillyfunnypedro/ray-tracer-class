@@ -23,7 +23,7 @@ function defaultNoTransformShader(vertex: number[], matrices: MatricesGL): numbe
         result[i] = vertex[i];
     }
 
-    // multiply by the matrix
+    // multiply by the matrices.toDevice
     vec4.transformMat4(result, result, matrices.toDevice);
 
     // return the first three elements of the result
@@ -44,19 +44,38 @@ class RenderTest {
     }
 
     render(modelName: string) {
+        let gl = new GL(this.frameBuffer);
 
         const model: Model = this.modelManager.getModel(modelName, this.frameBuffer.width, this.frameBuffer.height);
-        const vertices = model.vertices;
+        const dataBuffer = model.dataBuffer;
         const numVertices = model.numVertices;
+        const vertexSize = model.vertexSize
+        const vertexOffset = model.vertexOffset;
+        const colorSize = model.colorLength;
+        const colorOffset = model.colorOffset;
+
+
+        const textureLength = model.textureLength;
         const indices = model.indices;
 
-        let gl = new GL(this.frameBuffer);
+
         gl.setBackgroundColor(128, 128, 128);
         gl.clear(GL_COLOR_BUFFER_BIT);
-        gl.setDataBuffer(vertices);
+
+
+        gl.setDataBuffer(dataBuffer);
+
+        gl.setColorSize(colorSize);
+        gl.setColorOffset(colorOffset);
+        gl.setVertexSize(vertexSize);
+        gl.setVertexOffset(vertexOffset);
+
+        gl.setStride(colorSize + vertexSize);
 
 
         gl.setVertexShader(defaultNoTransformShader);
+
+
         // make the viewport square
         let size = Math.min(this.frameBuffer.width, this.frameBuffer.height);
 
@@ -65,6 +84,7 @@ class RenderTest {
         gl.setViewport(x_offset, y_offset, size, size);
 
         if (modelName === "triangleStrip") {
+
             gl.drawArrays(PRIM.TRIANGLE_STRIP, numVertices);
         }
 
@@ -73,7 +93,7 @@ class RenderTest {
             gl.drawArrays(PRIM.TRIANGLE_FAN, numVertices);
         }
 
-        if (modelName === "triangleMesh") {
+        if (modelName === "triangleMesh" || modelName === "triangleMesh2d") {
 
             gl.drawArrays(PRIM.TRIANGLES, numVertices);
         }

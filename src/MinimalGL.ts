@@ -36,9 +36,17 @@ export class GL {
     _indexBuffer: number[] = [];
     _inputVertexSize: number = 3;
     _inputColorSize: number = 3;
-    _stride: number = 6;
+    _stride: number = 0;
     _backgroundColor: Color = new Color(0, 0, 0);
     _matrices: MatricesGL = new MatricesGL();
+    _vertexSize: number = 0;
+    _vertexOffset: number = 0;
+    _colorSize: number = 0;
+    _colorOffset: number = 0;
+    _normalSize: number = 0;
+    _normalOffset: number = 0;
+    _textureSize: number = 0;
+    _textureOffset: number = 0;
 
     //* the matrices that will be used for the transformations
     // a function that takes an array of numbers and returns an array of numbers
@@ -65,6 +73,46 @@ export class GL {
     setBackgroundColor(r: number, g: number, b: number) {
         this._backgroundColor = new Color(r, g, b);
     }
+
+    setVertexSize(size: number) {
+        this._inputVertexSize = size;
+    }
+
+    setVertexOffset(offset: number) {
+        this._vertexOffset = offset;
+    }
+
+    setColorSize(size: number) {
+        this._colorSize = size;
+    }
+
+    setColorOffset(offset: number) {
+        this._colorOffset = offset;
+    }
+
+    setNormalSize(size: number) {
+        this._normalSize = size;
+    }
+
+    setNormalOffset(offset: number) {
+        this._normalOffset = offset;
+    }
+
+    setTextureSize(size: number) {
+        this._textureSize = size;
+    }
+
+    setTextureOffset(offset: number) {
+        this._textureOffset = offset;
+    }
+
+    setStride(stride: number) {
+        this._stride = stride;
+    }
+
+
+
+
 
     setViewport(x: number, y: number, width: number, height: number) {
         this._matrices.toDevice = mat4.create();
@@ -102,6 +150,10 @@ export class GL {
             throw new Error("Vertex shader not set");
         }
 
+        function getData(this: GL, vertexIndex: number, length: number, offset: number): number[] {
+            return this._dataBuffer.slice(vertexIndex * this._stride + offset, vertexIndex * this._stride + offset + length);
+        }
+
         // get the vertex based on stride and position
         function getVertex(this: GL, vertexIndex: number): number[] {
             return this._dataBuffer.slice(vertexIndex * this._stride, vertexIndex * this._stride + this._inputVertexSize);
@@ -110,15 +162,13 @@ export class GL {
         function getColor(this: GL, vertexIndex: number): number[] {
             return this._dataBuffer.slice(vertexIndex * this._stride + this._inputVertexSize, vertexIndex * this._stride + this._inputVertexSize + this._inputColorSize);
         }
-        // get the data buffer
-        let dataBuffer = this._dataBuffer;
 
-
+        // get the vertex position, the color, the normal, and the texture coordinate
         let resultingDataBuffer: number[] = [];
 
         for (let vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
-            let vertexData = getVertex.call(this, vertexIndex);
-            let colorData = getColor.call(this, vertexIndex);
+            let vertexData = getData.call(this, vertexIndex, this._inputVertexSize, this._vertexOffset);
+            let colorData = getData.call(this, vertexIndex, this._inputColorSize, this._colorOffset);
 
             let transformedVertex = vertexShader(vertexData, this._matrices);
             resultingDataBuffer = resultingDataBuffer.concat(transformedVertex);
