@@ -65,7 +65,7 @@ class RenderTest {
 
 
         const textureLength = model.textureLength;
-        const indices = model.indices;
+        const indexBuffer = model.indexBuffer;
 
 
         gl.setBackgroundColor(128, 128, 128);
@@ -114,6 +114,13 @@ class RenderTest {
         if (modelName === "triangleMesh" || modelName === "triangleMesh2d") {
 
             gl.drawArrays(PRIM.TRIANGLES, numVertices);
+        }
+
+        if (modelName === "meshIndex") {
+
+            gl.setIndexBuffer(indexBuffer);
+
+            gl.drawElements(PRIM.TRIANGLES, model.numVertices);
         }
 
 

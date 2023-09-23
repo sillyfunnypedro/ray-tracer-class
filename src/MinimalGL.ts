@@ -171,6 +171,31 @@ export class GL {
         }
     }
 
+    processVertices(numVertices: number): number[] {
+        let vertexShader = this._vertexShader;
+        if (vertexShader === null) {
+            throw new Error("Vertex shader not set");
+        }
+
+        function getData(this: GL, vertexIndex: number, length: number, offset: number): number[] {
+            return this._dataBuffer.slice(vertexIndex * this._stride + offset, vertexIndex * this._stride + offset + length);
+        }
+
+
+        let resultingDataBuffer: number[] = [];
+        for (let vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
+
+            let vertexData = getData.call(this, vertexIndex, this._inputVertexSize, this._vertexOffset);
+            let colorData = getData.call(this, vertexIndex, this._inputColorSize, this._colorOffset);
+
+            let transformedVertex = vertexShader(vertexData, this._matrices);
+            resultingDataBuffer = resultingDataBuffer.concat(transformedVertex);
+            resultingDataBuffer = resultingDataBuffer.concat(colorData);
+        }
+        return resultingDataBuffer;
+
+    }
+
 
     drawArrays(primitive: PRIM, numVertices: number) {
         // get the vertex shader
@@ -185,30 +210,8 @@ export class GL {
             throw new Error("Fragment shader not set");
         }
 
-        function getData(this: GL, vertexIndex: number, length: number, offset: number): number[] {
-            return this._dataBuffer.slice(vertexIndex * this._stride + offset, vertexIndex * this._stride + offset + length);
-        }
-
-        // get the vertex based on stride and position
-        function getVertex(this: GL, vertexIndex: number): number[] {
-            return this._dataBuffer.slice(vertexIndex * this._stride, vertexIndex * this._stride + this._inputVertexSize);
-        }
-        // get the color based on stride and position
-        function getColor(this: GL, vertexIndex: number): number[] {
-            return this._dataBuffer.slice(vertexIndex * this._stride + this._inputVertexSize, vertexIndex * this._stride + this._inputVertexSize + this._inputColorSize);
-        }
-
         // get the vertex position, the color, the normal, and the texture coordinate
-        let resultingDataBuffer: number[] = [];
-
-        for (let vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
-            let vertexData = getData.call(this, vertexIndex, this._inputVertexSize, this._vertexOffset);
-            let colorData = getData.call(this, vertexIndex, this._inputColorSize, this._colorOffset);
-
-            let transformedVertex = vertexShader(vertexData, this._matrices);
-            resultingDataBuffer = resultingDataBuffer.concat(transformedVertex);
-            resultingDataBuffer = resultingDataBuffer.concat(colorData);
-        }
+        let resultingDataBuffer = this.processVertices(numVertices);
 
         if (primitive == PRIM.TRIANGLES) {
             GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices, this._frameBuffer, this._drawBorder, this._borderColor);
@@ -221,6 +224,23 @@ export class GL {
             GeometricProcessor.fillTriangleFan(resultingDataBuffer, numVertices, this._frameBuffer, this._drawBorder, this._borderColor);
         }
 
+    }
+
+    drawElements(primitive: PRIM, numVertices: number) {
+        // get the vertex shader
+        let vertexShader = this._vertexShader;
+        if (vertexShader === null) {
+            throw new Error("Vertex shader not set");
+        }
+
+        // get the fragment shader
+        let fragmentShader = this._fragmentShader;
+        if (fragmentShader === null) {
+            throw new Error("Fragment shader not set");
+        }
+
+        let resultingDataBuffer = this.processVertices(numVertices);
+        GeometricProcessor.fillTrianglesIndex(resultingDataBuffer, this._indexBuffer, this._indexBuffer.length / 3, this._frameBuffer, this._drawBorder, this._borderColor);
     }
 
 }

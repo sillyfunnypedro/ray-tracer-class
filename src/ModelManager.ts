@@ -21,7 +21,7 @@ export class Model {
     textureLength: number = 0;
     textureOffset: number = 0;
 
-    indices: number[];
+    indexBuffer: number[];
     numVertices: number;
 
 
@@ -42,7 +42,7 @@ export class Model {
         this.colorLength = colorLength;
         this.textureLength = textureLength;
         this.textureOffset = textureOffset;
-        this.indices = indices;
+        this.indexBuffer = indices;
         this.numVertices = numVertices;
     }
     static emptyModel(): Model {
@@ -57,7 +57,7 @@ export class ModelManager {
     models: string[] = [
         "triangleStrip",
         "triangleFan",
-        //        "meshIndex",
+        "meshIndex",
         "triangleMesh",
         "triangleMesh2d"
     ];
@@ -84,6 +84,8 @@ export class ModelManager {
                 return this.generateTriangles();
             case "triangleMesh2d":
                 return this.generateTriangles2d();
+            case "meshIndex":
+                return this.generateTrianglesIndex();
             default:
                 return Model.emptyModel()
         }
@@ -254,14 +256,14 @@ export class ModelManager {
      * Draw a mesh to test the drawTriangles function
      * @param frame 
      */
-    private generateTrianglesIndex(frame: FrameBuffer, drawBorder: boolean, borderColor: Color): void {
+    private generateTrianglesIndex(): Model {
         // you can change the constants here to change the look of the mesh
-        const x = 10;
-        const y = 10;
-        const w = 180;
-        const h = 100;
+        const x = -0.7;
+        const y = -0.7;
+        const w = 1;
+        const h = 1;
         const x_steps = 10;
-        const y_steps = 5;
+        const y_steps = 10;
         const x_step = w / x_steps;
         const y_step = h / y_steps;
         const color0 = new Color(255, 0, 0);
@@ -269,39 +271,49 @@ export class ModelManager {
         const color2 = new Color(0, 0, 255);
         const color3 = new Color(255, 255, 0);
 
-        const vertices: number[] = [];
+        const dataBuffer: number[] = [];
         let num_vertices = 0;
         for (let i = 0; i < x_steps + 1; i++) {
             for (let j = 0; j < y_steps + 1; j++) {
                 const s = i / x_steps;
                 const t = j / y_steps;
                 const color = Color.interpolate2d(color0, color1, color2, color3, s, t);
-                vertices.push(x + i * x_step);
-                vertices.push(y + j * y_step);
-                vertices.push(0);
-                vertices.push(Math.floor(color.r));
-                vertices.push(Math.floor(color.g));
-                vertices.push(Math.floor(color.b));
+                dataBuffer.push(x + i * x_step);
+                dataBuffer.push(y + j * y_step);
+                dataBuffer.push(0);
+                dataBuffer.push(Math.floor(color.r));
+                dataBuffer.push(Math.floor(color.g));
+                dataBuffer.push(Math.floor(color.b));
                 num_vertices += 1;
             }
         }
 
-        const indices: number[] = [];
+        const indexBuffer: number[] = [];
         let numTriangles = 0;
 
         for (let i = 0; i < x_steps; i++) {
             for (let j = 0; j < y_steps; j++) {
-                indices.push(i * (y_steps + 1) + j);
-                indices.push(i * (y_steps + 1) + j + 1);
-                indices.push((i + 1) * (y_steps + 1) + j);
-                indices.push(i * (y_steps + 1) + j + 1);
-                indices.push((i + 1) * (y_steps + 1) + j + 1);
-                indices.push((i + 1) * (y_steps + 1) + j);
+                indexBuffer.push(i * (y_steps + 1) + j);
+                indexBuffer.push(i * (y_steps + 1) + j + 1);
+                indexBuffer.push((i + 1) * (y_steps + 1) + j);
+                indexBuffer.push(i * (y_steps + 1) + j + 1);
+                indexBuffer.push((i + 1) * (y_steps + 1) + j + 1);
+                indexBuffer.push((i + 1) * (y_steps + 1) + j);
                 numTriangles += 2;
             }
         }
 
-        GeometricProcessor.fillTrianglesIndex(vertices, indices, numTriangles, frame, drawBorder, borderColor);
+        let result: Model = new Model();
+        result.dataBuffer = dataBuffer;
+        result.indexBuffer = indexBuffer;
+        result.vertexSize = 3;
+        result.vertexOffset = 0;
+        result.colorLength = 3;
+        result.colorOffset = 3;
+        result.numVertices = numTriangles + 2
+
+        return result;
+
     }
 
     /**
