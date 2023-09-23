@@ -25,6 +25,15 @@ export class MatricesGL {
     toDevice: mat4 = mat4.identity(mat4.create());
 }
 
+export class FragmentGL {
+    color: Color = new Color(0, 0, 0);
+    uv: number[] = [];
+    normal: number[] = [];
+    fromEye: number[] = [];
+    fromLight: number[] = [];
+    depth: number = 0;
+}
+
 
 
 
@@ -53,6 +62,8 @@ export class GL {
     // this is the default vertex shader
     _vertexShader: ((data: number[], matrices: MatricesGL) => number[]) | null = null;
 
+    _fragmentShader: ((data: FragmentGL) => number[]) | null = null;
+
 
     constructor(frameBuffer: FrameBuffer) {
         this._frameBuffer = frameBuffer;
@@ -68,6 +79,10 @@ export class GL {
 
     setVertexShader(shader: (data: number[], matrices: MatricesGL) => number[]) {
         this._vertexShader = shader;
+    }
+
+    setFragmentShader(shader: (data: FragmentGL) => number[]) {
+        this._fragmentShader = shader;
     }
 
     setBackgroundColor(r: number, g: number, b: number) {
@@ -150,6 +165,12 @@ export class GL {
             throw new Error("Vertex shader not set");
         }
 
+        // get the fragment shader
+        let fragmentShader = this._fragmentShader;
+        if (fragmentShader === null) {
+            throw new Error("Fragment shader not set");
+        }
+
         function getData(this: GL, vertexIndex: number, length: number, offset: number): number[] {
             return this._dataBuffer.slice(vertexIndex * this._stride + offset, vertexIndex * this._stride + offset + length);
         }
@@ -176,7 +197,7 @@ export class GL {
         }
 
         if (primitive == PRIM.TRIANGLES) {
-            GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices, this._frameBuffer, true, new Color(255, 0, 0));
+            GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices, this._frameBuffer, true, new Color(10, 10, 10));
         }
         if (primitive == PRIM.TRIANGLE_STRIP) {
             GeometricProcessor.fillTriangleStrip(resultingDataBuffer, numVertices, this._frameBuffer, true, new Color(10, 10, 10));

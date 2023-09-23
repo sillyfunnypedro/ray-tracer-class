@@ -2,6 +2,8 @@ import { off } from "process";
 import Color from "./Color";
 import FrameBuffer from "./FrameBuffer";
 
+
+
 class GeometricProcessor {
     // draw a line using breseham algorithm
 

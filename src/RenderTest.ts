@@ -1,23 +1,15 @@
-import { GL, PRIM, GL_COLOR_BUFFER_BIT, MatricesGL } from './MinimalGL'
+import { GL, PRIM, GL_COLOR_BUFFER_BIT, MatricesGL, FragmentGL } from './MinimalGL'
 import FrameBuffer from './FrameBuffer'
 import { ModelManager, Model } from './ModelManager';
 import { mat4, vec4 } from 'gl-matrix'
 
 
-
-function doNothingShader(vertex: number[], matrices: MatricesGL): number[] {
-    // define result as vector
-    let result: vec4 = [0, 0, 0, 1];
-    for (let i = 0; i < vertex.length; i++) {
-        result[i] = vertex[i];
-    }
-
-
-
-    return [result[0], result[1], result[2]];
+function defaultFragmentShader(fragParameters: FragmentGL): number[] {
+    let result = fragParameters.color;
+    return [result.r, result.g, result.b, 255];
 }
 
-function defaultNoTransformShader(vertex: number[], matrices: MatricesGL): number[] {
+function defaultVertexShader(vertex: number[], matrices: MatricesGL): number[] {
     let result: vec4 = [0, 0, 0, 1];
     for (let i = 0; i < vertex.length; i++) {
         result[i] = vertex[i];
@@ -65,15 +57,21 @@ class RenderTest {
 
         gl.setDataBuffer(dataBuffer);
 
+        // This is the same idea as OpenGL's VAO but we provide a more readable API
         gl.setColorSize(colorSize);
         gl.setColorOffset(colorOffset);
+
         gl.setVertexSize(vertexSize);
         gl.setVertexOffset(vertexOffset);
 
+        // it is important here to add up all the elements that are in the data.
         gl.setStride(colorSize + vertexSize);
 
+        // here is our vertex shader
+        gl.setVertexShader(defaultVertexShader);
 
-        gl.setVertexShader(defaultNoTransformShader);
+        // here is our fragment shader
+        gl.setFragmentShader(defaultFragmentShader);
 
 
         // make the viewport square

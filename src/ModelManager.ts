@@ -239,7 +239,7 @@ export class ModelManager {
         result.vertexOffset = 0;
         result.colorLength = 3;
         result.colorOffset = 3;
-        result.numVertices = numTriangles
+        result.numVertices = numTriangles + 2
 
 
         return result;
