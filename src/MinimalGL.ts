@@ -6,7 +6,7 @@
 import Color from "./Color";
 import FrameBuffer from "./FrameBuffer";
 import GeometricProcessor from "./GeometricProcessor";
-import { mat4 } from "gl-matrix";
+import { mat4, vec4 } from "gl-matrix";
 // types for drawArrays
 export enum PRIM {
     POINTS,
@@ -196,8 +196,14 @@ export class GL {
             let vertexData = getData.call(this, vertexIndex, this._inputVertexSize, this._vertexOffset);
             let colorData = getData.call(this, vertexIndex, this._inputColorSize, this._colorOffset);
 
-            let transformedVertex = vertexShader(vertexData, this._matrices);
-            resultingDataBuffer = resultingDataBuffer.concat(transformedVertex);
+            let newData = vertexShader(vertexData, this._matrices); // assume this returns a 4 dimensional vector
+
+            let newDataVec4 = vec4.fromValues(newData[0], newData[1], newData[2], newData[3]);
+
+            vec4.transformMat4(newDataVec4, newDataVec4, this._matrices.toDevice);
+            newData = [newDataVec4[0], newDataVec4[1], newDataVec4[2], newDataVec4[3]];
+
+            resultingDataBuffer = resultingDataBuffer.concat(newData[0], newData[1], newData[2]);
             resultingDataBuffer = resultingDataBuffer.concat(colorData);
         }
         return resultingDataBuffer;

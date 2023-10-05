@@ -28,11 +28,8 @@ function defaultVertexShader(vertex: number[], matrices: MatricesGL): number[] {
     }
 
     vec4.transformMat4(result, result, matrices.modelMatrix);
-    // multiply by the matrices.toDevice
-    vec4.transformMat4(result, result, matrices.toDevice);
 
-    // return the first three elements of the result
-    return [result[0], result[1], result[2]];
+    return [result[0], result[1], result[2], result[3]];
 
 }
 
@@ -103,17 +100,10 @@ class RenderTest {
         gl.setViewport(x_offset, y_offset, size, size);
         //gl.setViewport(0, 0, this.frameBuffer.width, this.frameBuffer.height);
 
+
         let modelMatrix = mat4.create();
 
-        mat4.translate(modelMatrix, modelMatrix, [translateX, translateY, translateZ]);
-        mat4.rotateX(modelMatrix, modelMatrix, rotateX / 180.0 * Math.PI);
-        mat4.rotateY(modelMatrix, modelMatrix, rotateY / 180.0 * Math.PI);
-        mat4.rotateZ(modelMatrix, modelMatrix, rotateZ / 180.0 * Math.PI);
-
-        mat4.scale(modelMatrix, modelMatrix, [scaleX, scaleY, scaleZ]);
-
-
-
+        // TODO what order will you do your scale/ translate  rotate in.
 
         gl.setModelMatrix(modelMatrix);
 
