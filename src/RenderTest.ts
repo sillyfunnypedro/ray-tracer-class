@@ -104,13 +104,15 @@ class RenderTest {
         //gl.setViewport(0, 0, this.frameBuffer.width, this.frameBuffer.height);
 
         let modelMatrix = mat4.create();
-        mat4.scale(modelMatrix, modelMatrix, [scaleX, scaleY, scaleZ]);
 
+        mat4.translate(modelMatrix, modelMatrix, [translateX, translateY, translateZ]);
         mat4.rotateX(modelMatrix, modelMatrix, rotateX / 180.0 * Math.PI);
         mat4.rotateY(modelMatrix, modelMatrix, rotateY / 180.0 * Math.PI);
         mat4.rotateZ(modelMatrix, modelMatrix, rotateZ / 180.0 * Math.PI);
 
-        mat4.translate(modelMatrix, modelMatrix, [translateX, translateY, translateZ]);
+        mat4.scale(modelMatrix, modelMatrix, [scaleX, scaleY, scaleZ]);
+
+
 
 
         gl.setModelMatrix(modelMatrix);

@@ -117,10 +117,10 @@ function ControlComponent({
         setRotateY(0);
         setRotateZ(0);
         updateRotate(0, 0, 0);
-        setScaleX(0.5);
-        setScaleY(0.5);
-        setScaleZ(0.5);
-        updateScale(0.5, 0.5, 0.5);
+        setScaleX(1);
+        setScaleY(1);
+        setScaleZ(1);
+        updateScale(1, 1, 1);
     }
 
     /**
@@ -169,21 +169,21 @@ function ControlComponent({
                             </th>
                             <th className="rightAlign">
                                 <label htmlFor="myRangeX">X:</label>
-                                <input name="x" type="range" min="-50" max="50" step="any"
+                                <input name="x" type="range" min="-5" max="5" step="any"
                                     value={translateX} className="slider"
                                     onChange={(event) => handleSliderChangeTranslate(event, "x")} id="myRangeX">
 
                                 </input>
                                 <br />
                                 <label htmlFor="myRangeY">Y:</label>
-                                <input name="y" type="range" min="-50" max="50" step="any"
+                                <input name="y" type="range" min="-5" max="5" step="any"
                                     value={translateY} className="slider"
                                     onChange={(event) => handleSliderChangeTranslate(event, "y")} id="myRangeY">
 
                                 </input>
                                 <br />
                                 <label htmlFor="myRangeZ">Z:</label>
-                                <input name="z" type="range" min="-50" max="50" step="any"
+                                <input name="z" type="range" min="-5" max="5" step="any"
                                     value={translateZ} className="slider"
                                     onChange={(event) => handleSliderChangeTranslate(event, "z")} id="myRangeZ">
 
