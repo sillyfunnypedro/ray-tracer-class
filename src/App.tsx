@@ -7,6 +7,7 @@ import GeometricProcessor from './GeometricProcessor'
 import { ModelManager } from './ModelManager'
 import { GL } from './MinimalGL'
 import RenderTest from './RenderTest';
+import ControlComponent from './ControlComponent';
 
 
 const modelManager = new ModelManager();
@@ -20,6 +21,18 @@ function App() {
   const [selectedModel, setSelectedModel] = useState("");
   const [borderColor, setBorderColor] = useState([10, 10, 10]);
   const [pixelSize, setPixelSize] = useState(4);
+
+  const [rotateX, setRotateX] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+  const [rotateZ, setRotateZ] = useState(0);
+
+  const [translateX, setTranslateX] = useState(0);
+  const [translateY, setTranslateY] = useState(0);
+  const [translateZ, setTranslateZ] = useState(0);
+
+  const [scaleX, setScaleX] = useState(1);
+  const [scaleY, setScaleY] = useState(1);
+  const [scaleZ, setScaleZ] = useState(1);
 
 
 
@@ -39,7 +52,31 @@ function App() {
     setSelectedModel(modelNames[0]);
   }, []);
 
+  function updateTranslate(x: number, y: number, z: number) {
 
+    setTranslateX(x);
+    setTranslateY(y);
+    setTranslateZ(z);
+    console.log(`updateTranslate: ${x}, ${y}, ${z}`);
+  }
+
+  function updateRotate(x: number, y: number, z: number) {
+
+    setRotateX(x);
+    setRotateY(y);
+    setRotateZ(z);
+
+    console.log(`updateRotate: ${x}, ${y}, ${z}`);
+  }
+
+  function updateScale(x: number, y: number, z: number) {
+
+    setScaleX(x);
+    setScaleY(y);
+    setScaleZ(z);
+
+    console.log(`updateScale (APP)_: ${x}, ${y}, ${z}`);
+  }
   // a Component that calls models.getModels and produces buttons for selecting models
   function ModelSelectionComponent() {
     const modelNames = modelManager.getModels();
@@ -104,7 +141,7 @@ function App() {
   }
   const renderer = new RenderTest(frame, drawBorder, borderColor);
 
-  renderer.render(selectedModel);
+  renderer.render(selectedModel, rotateX, rotateY, rotateZ, translateX, translateY, translateZ, scaleX, scaleY, scaleZ);
 
   /** 
    * Get the image from the frame buffer and draw it on the canvas
@@ -147,6 +184,8 @@ function App() {
         <ModelSelectionComponent />
         <BorderControlComponent />
         <PixelSizeComponent />
+        <ControlComponent updateTranslate={updateTranslate} updateRotate={updateRotate} updateScale={updateScale}
+        />
       </header>
     </div>
   );

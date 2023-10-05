@@ -27,6 +27,7 @@ function defaultVertexShader(vertex: number[], matrices: MatricesGL): number[] {
         result[i] = vertex[i];
     }
 
+    vec4.transformMat4(result, result, matrices.modelMatrix);
     // multiply by the matrices.toDevice
     vec4.transformMat4(result, result, matrices.toDevice);
 
@@ -52,7 +53,7 @@ class RenderTest {
         this.borderColorArray = borderColorArray;
     }
 
-    render(modelName: string) {
+    render(modelName: string, rotateX: number, rotateY: number, rotateZ: number, translateX: number, translateY: number, translateZ: number, scaleX: number, scaleY: number, scaleZ: number) {
         let gl = new GL(this.frameBuffer);
 
         const model: Model = this.modelManager.getModel(modelName, this.frameBuffer.width, this.frameBuffer.height);
@@ -100,6 +101,19 @@ class RenderTest {
         let x_offset = (this.frameBuffer.width - size) / 2;
         let y_offset = (this.frameBuffer.height - size) / 2;
         gl.setViewport(x_offset, y_offset, size, size);
+        //gl.setViewport(0, 0, this.frameBuffer.width, this.frameBuffer.height);
+
+        let modelMatrix = mat4.create();
+        mat4.scale(modelMatrix, modelMatrix, [scaleX, scaleY, scaleZ]);
+
+        mat4.rotateX(modelMatrix, modelMatrix, rotateX / 180.0 * Math.PI);
+        mat4.rotateY(modelMatrix, modelMatrix, rotateY / 180.0 * Math.PI);
+        mat4.rotateZ(modelMatrix, modelMatrix, rotateZ / 180.0 * Math.PI);
+
+        mat4.translate(modelMatrix, modelMatrix, [translateX, translateY, translateZ]);
+
+
+        gl.setModelMatrix(modelMatrix);
 
         if (modelName === "triangleStrip") {
 
@@ -119,7 +133,6 @@ class RenderTest {
         if (modelName === "meshIndex") {
 
             gl.setIndexBuffer(indexBuffer);
-
             gl.drawElements(PRIM.TRIANGLES, model.numVertices);
         }
 

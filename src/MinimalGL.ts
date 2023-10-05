@@ -22,7 +22,10 @@ export const GL_DEPTH_BUFFER_BIT = 0x00000100;
 export const GL_STENCIL_BUFFER_BIT = 0x00000400;
 
 export class MatricesGL {
-    toDevice: mat4 = mat4.identity(mat4.create());
+    toDevice: mat4 = mat4.identity(mat4.create());  // from normalized device coordinates to device coordinates
+    modelMatrix: mat4 = mat4.identity(mat4.create());
+    viewMatrix: mat4 = mat4.identity(mat4.create());
+    projectionMatrix: mat4 = mat4.identity(mat4.create());
 }
 
 export class FragmentGL {
@@ -139,6 +142,20 @@ export class GL {
         this._borderColor = new Color(r, g, b);
     }
 
+    setModelMatrix(matrix: mat4) {
+        this._matrices.modelMatrix = matrix;
+    }
+
+    setViewMatrix(matrix: mat4) {
+        this._matrices.viewMatrix = matrix;
+    }
+
+    setProjectionMatrix(matrix: mat4) {
+        this._matrices.projectionMatrix = matrix;
+    }
+
+
+
 
 
 
@@ -150,15 +167,6 @@ export class GL {
         mat4.translate(this._matrices.toDevice, this._matrices.toDevice, [x, y, 0]);
         mat4.translate(this._matrices.toDevice, this._matrices.toDevice, [width / 2, height / 2, 0]);
         mat4.scale(this._matrices.toDevice, this._matrices.toDevice, [width / 2, -height / 2, 1]);
-
-
-
-        // flip the y axis
-        //mat4.scale(this._matrices.toDevice, this._matrices.toDevice, [1, -1, 1]);
-        // translate to the origin
-        //mat4.translate(this._matrices.toDevice, this._matrices.toDevice, [0, -height, 0]);
-
-
     }
 
 
@@ -240,6 +248,7 @@ export class GL {
         }
 
         let resultingDataBuffer = this.processVertices(numVertices);
+
         GeometricProcessor.fillTrianglesIndex(resultingDataBuffer, this._indexBuffer, this._indexBuffer.length / 3, this._frameBuffer, this._drawBorder, this._borderColor);
     }
 
