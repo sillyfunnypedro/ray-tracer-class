@@ -196,7 +196,11 @@ export class GL {
             let vertexData = getData.call(this, vertexIndex, this._inputVertexSize, this._vertexOffset);
             let colorData = getData.call(this, vertexIndex, this._inputColorSize, this._colorOffset);
 
-            let newData = vertexShader(vertexData, this._matrices); // assume this returns a 4 dimensional vector
+            // This is where we need the call to the vertex shader.
+            let newData = [0, 0, 0, 1]
+            for (let i = 0; i < vertexData.length; i++) {
+                newData[i] = vertexData[i];
+            }
 
             let newDataVec4 = vec4.fromValues(newData[0], newData[1], newData[2], newData[3]);
 
@@ -205,6 +209,8 @@ export class GL {
 
             resultingDataBuffer = resultingDataBuffer.concat(newData[0], newData[1], newData[2]);
             resultingDataBuffer = resultingDataBuffer.concat(colorData);
+
+            // for now we use 3 for x, y, z since our backend assumes a 3d coordinate system.
         }
         return resultingDataBuffer;
 
