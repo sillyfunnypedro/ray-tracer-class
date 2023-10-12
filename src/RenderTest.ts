@@ -48,6 +48,57 @@ function uvShadeFragmentShader(fragParameters: FragmentGL): number[] {
     return result;
 }
 
+function rotate45FragmentShader(fragParameters: FragmentGL): number[] {
+    let result: number[] = [];
+    let x = fragParameters.uv[0];
+    let y = fragParameters.uv[1];
+
+    // TODO inplement this in class
+    let xPrime = x;
+    let yPrime = y;
+    if (fragParameters.PPMTexture !== null) {
+        let textureResult = fragParameters.PPMTexture.sampler2D(xPrime, yPrime);
+        result = textureResult;
+    }
+    result = [255, 0, 0, 255];
+
+    return result;
+}
+
+function helixFragmentShader(fragParameters: FragmentGL): number[] {
+    let result: number[] = [];
+    let x = fragParameters.uv[0];
+    let y = fragParameters.uv[1];
+
+    // TODO inplement this in class
+    let xPrime = x;
+    let yPrime = y;
+    if (fragParameters.PPMTexture !== null) {
+        let textureResult = fragParameters.PPMTexture.sampler2D(xPrime, yPrime);
+        result = textureResult;
+    }
+    result = [0, 255, 0, 255];
+
+    return result;
+}
+
+function mirrorFragmentShader(fragParameters: FragmentGL): number[] {
+    let result: number[] = [];
+    let x = fragParameters.uv[0];
+    let y = fragParameters.uv[1];
+
+    // TODO inplement this in class
+    let xPrime = x;
+    let yPrime = y;
+    if (fragParameters.PPMTexture !== null) {
+        let textureResult = fragParameters.PPMTexture.sampler2D(xPrime, yPrime);
+        result = textureResult;
+    }
+    result = [255, 0, 255, 255];
+
+    return result;
+}
+
 
 
 
@@ -58,7 +109,7 @@ class RenderTest {
     drawBorder: boolean;
     borderColorArray: number[];
     ppm: PPM = new PPM();
-
+    _shader: string = "regularShader";
 
 
 
@@ -163,7 +214,24 @@ class RenderTest {
         }
         if (modelName === "triangleTexture" || modelName === "quadTexture") {
             gl.setTextureObject(this.ppm);  // yeah we only have one texture in this right now.
-            gl.setFragmentShader(uvShadeFragmentShader);
+
+            switch (this._shader) {
+                case "regularShader":
+                    gl.setFragmentShader(uvShadeFragmentShader);
+                    break;
+                case "rotate45Shader":
+                    gl.setFragmentShader(rotate45FragmentShader);
+                    break;
+                case "mirrorShader":
+                    gl.setFragmentShader(mirrorFragmentShader);
+                    break;
+                case "helixShader":
+                    gl.setFragmentShader(helixFragmentShader);
+                    break;
+            }
+
+
+
             gl.drawArrays(PRIM.TRIANGLES, numVertices);
         }
 
@@ -174,6 +242,10 @@ class RenderTest {
 
 
 
+
+    }
+    setShader(shader: string) {
+        this._shader = shader;
 
     }
 
