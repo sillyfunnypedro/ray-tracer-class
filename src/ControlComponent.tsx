@@ -20,13 +20,14 @@ interface ControlComponentProps {
     updateTranslate: (x: number, y: number, z: number) => void;
     updateRotate: (x: number, y: number, z: number) => void;
     updateScale: (x: number, y: number, z: number) => void;
+    updateShader: (newShader: string) => void;
 }
 
 const scaleSteps = 50;
 // define the ControlComponent
 function ControlComponent({
     // updateRenderObject, updateRenderMode, updateProjectionMode, 
-    updateTranslate, updateRotate, updateScale }: ControlComponentProps) {
+    updateTranslate, updateRotate, updateScale, updateShader }: ControlComponentProps) {
 
     const [translateX, setTranslateX] = useState(0);
     const [translateY, setTranslateY] = useState(0);
@@ -195,6 +196,30 @@ function ControlComponent({
             </div>
         );
     }
+    // three buttons for the second part of the assignment
+    // regularShader, rotate45Shader, and mirrorShader
+    function makeShaderSelector() {
+        return (
+            <div>
+                <table className="tableWidth">
+                    <thead>
+                        <tr>
+                            <th className="leftAlign">
+                                Shader
+                            </th>
+                            <th className="rightAlign">
+                                <button onClick={() => updateShader("regularShader")}>Regular</button>
+                                <button onClick={() => updateShader("rotate45Shader")}>Rotate 45</button>
+                                <button onClick={() => updateShader("mirrorShader")}>Mirror</button>
+                                <button onClick={() => updateShader("checkerShader")}>Checker</button>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        );
+    }
+
 
     /**
      * 
@@ -327,6 +352,8 @@ function ControlComponent({
                             {makeScaleSliders()}
                             <hr className="lineWidth" />
                             {makeControlButtons()}
+                            <hr className="lineWidth" />
+                            {makeShaderSelector()}
                             <hr className="lineWidth" />
                         </th>
                     </tr>
