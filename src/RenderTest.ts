@@ -54,13 +54,13 @@ function rotate45FragmentShader(fragParameters: FragmentGL): number[] {
     let y = fragParameters.uv[1];
 
     // TODO inplement this in class
-    let xPrime = x;
-    let yPrime = y;
+    let xPrime = x * Math.cos(Math.PI / 4) - y * Math.sin(Math.PI / 4);
+    let yPrime = x * Math.sin(Math.PI / 4) + y * Math.cos(Math.PI / 4);
     if (fragParameters.PPMTexture !== null) {
         let textureResult = fragParameters.PPMTexture.sampler2D(xPrime, yPrime);
         result = textureResult;
     }
-    result = [255, 0, 0, 255];
+
 
     return result;
 }
@@ -71,30 +71,39 @@ function helixFragmentShader(fragParameters: FragmentGL): number[] {
     let y = fragParameters.uv[1];
 
     // TODO inplement this in class
-    let xPrime = x;
-    let yPrime = y;
+    let r = Math.sqrt(x * x + y * y);
+    let xPrime = r;
+    let yPrime = r * Math.cos(Math.atan2(y, x));
     if (fragParameters.PPMTexture !== null) {
         let textureResult = fragParameters.PPMTexture.sampler2D(xPrime, yPrime);
         result = textureResult;
     }
-    result = [0, 255, 0, 255];
+
 
     return result;
 }
 
 function mirrorFragmentShader(fragParameters: FragmentGL): number[] {
     let result: number[] = [];
-    let x = fragParameters.uv[0];
-    let y = fragParameters.uv[1];
+    let x = fragParameters.uv[0] * 4;
+    let y = fragParameters.uv[1] * 4;
 
     // TODO inplement this in class
+    x = x % 2;
+    if (x > 1) {
+        x = 2 - x;
+    }
+
+    y = y % 2;
+    if (y > 1) {
+        y = 2 - y;
+    }
     let xPrime = x;
     let yPrime = y;
     if (fragParameters.PPMTexture !== null) {
         let textureResult = fragParameters.PPMTexture.sampler2D(xPrime, yPrime);
         result = textureResult;
     }
-    result = [255, 0, 255, 255];
 
     return result;
 }

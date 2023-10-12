@@ -211,7 +211,7 @@ function ControlComponent({
                                 <button onClick={() => updateShader("regularShader")}>Regular</button>
                                 <button onClick={() => updateShader("rotate45Shader")}>Rotate 45</button>
                                 <button onClick={() => updateShader("mirrorShader")}>Mirror</button>
-                                <button onClick={() => updateShader("checkerShader")}>Checker</button>
+                                <button onClick={() => updateShader("helixShader")}>Helix</button>
                             </th>
                         </tr>
                     </thead>
