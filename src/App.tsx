@@ -12,11 +12,13 @@ import ControlComponent from './ControlComponent';
 
 const modelManager = new ModelManager();
 const maxPixelSize = 4;
-
+const frame = new FrameBuffer(320, 200);
+const borderColor = [10, 10, 10];
+const renderer = new RenderTest(frame, true, borderColor);
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [frame, setFrame] = useState(new FrameBuffer(320, 200));
+
   const [drawBorder, setDrawBorder] = useState(true);
   const [selectedModel, setSelectedModel] = useState("triangleTexture");
   const [borderColor, setBorderColor] = useState([10, 10, 10]);
@@ -36,6 +38,8 @@ function App() {
 
 
 
+
+
   // a call back to set the model to draw
 
   function setModel(event: React.MouseEvent<HTMLButtonElement>): void {
@@ -50,7 +54,9 @@ function App() {
   useEffect(() => {
     const modelNames = modelManager.getModels();
     setSelectedModel(modelNames[0]);
+
   }, []);
+
 
   function updateTranslate(x: number, y: number, z: number) {
 
@@ -139,7 +145,7 @@ function App() {
       </div>
     );
   }
-  const renderer = new RenderTest(frame, drawBorder, borderColor);
+
 
   renderer.render(selectedModel, rotateX, rotateY, rotateZ, translateX, translateY, translateZ, scaleX, scaleY, scaleZ);
 
