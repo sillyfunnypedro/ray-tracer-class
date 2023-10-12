@@ -77,6 +77,12 @@ function App() {
     console.log(`updateTranslate: ${x}, ${y}, ${z}`);
   }
 
+  function updateShader(shader: string) {
+    renderer.setShader(shader);
+    nextFrame();
+    setFrameNumber(frameNumber + 1);
+  }
+
   function updateRotate(x: number, y: number, z: number) {
 
     setRotateX(x);
@@ -205,7 +211,7 @@ function App() {
         <ModelSelectionComponent />
         <BorderControlComponent />
         <PixelSizeComponent />
-        <ControlComponent updateTranslate={updateTranslate} updateRotate={updateRotate} updateScale={updateScale} />
+        <ControlComponent updateTranslate={updateTranslate} updateRotate={updateRotate} updateScale={updateScale} updateShader={updateShader} />
         <CameraControlComponent camera={camera} updateCamera={updateCamera} />
 
       </header>
