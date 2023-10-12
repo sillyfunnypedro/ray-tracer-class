@@ -4,6 +4,7 @@ import { ModelManager, Model } from './ModelManager';
 import { mat4, vec4 } from 'gl-matrix'
 import PPM from './PPM';
 import { imageSource } from './ImageSource';
+import Camera from './Camera';
 
 
 function defaultFragmentShader(fragParameters: FragmentGL): number[] {
@@ -30,6 +31,8 @@ function defaultVertexShader(vertex: number[], matrices: MatricesGL): number[] {
     }
 
     vec4.transformMat4(result, result, matrices.modelMatrix);
+    vec4.transformMat4(result, result, matrices.viewMatrix);
+    vec4.transformMat4(result, result, matrices.projectionMatrix);
 
     return [result[0], result[1], result[2], result[3]];
 
@@ -66,7 +69,7 @@ class RenderTest {
         this.ppm.loadFileFromString(imageSource);
     }
 
-    render(modelName: string, rotateX: number, rotateY: number, rotateZ: number, translateX: number, translateY: number, translateZ: number, scaleX: number, scaleY: number, scaleZ: number) {
+    render(modelName: string, rotateX: number, rotateY: number, rotateZ: number, translateX: number, translateY: number, translateZ: number, scaleX: number, scaleY: number, scaleZ: number, camera: Camera) {
         let gl = new GL(this.frameBuffer);
 
         const model: Model = this.modelManager.getModel(modelName, this.frameBuffer.width, this.frameBuffer.height);
@@ -127,12 +130,16 @@ class RenderTest {
         let modelMatrix = mat4.create();
 
         mat4.translate(modelMatrix, modelMatrix, [translateX, translateY, translateZ]);
-        mat4.rotate(modelMatrix, modelMatrix, rotateX/180.0 * Math.PI, [1, 0, 0]);
-        mat4.rotate(modelMatrix, modelMatrix, rotateY/180.0 * Math.PI, [0, 1, 0]);
-        mat4.rotate(modelMatrix, modelMatrix, rotateZ/180.0 * Math.PI, [0, 0, 1]);
+        mat4.rotate(modelMatrix, modelMatrix, rotateX / 180.0 * Math.PI, [1, 0, 0]);
+        mat4.rotate(modelMatrix, modelMatrix, rotateY / 180.0 * Math.PI, [0, 1, 0]);
+        mat4.rotate(modelMatrix, modelMatrix, rotateZ / 180.0 * Math.PI, [0, 0, 1]);
         mat4.scale(modelMatrix, modelMatrix, [scaleX, scaleY, scaleZ]);
 
         gl.setModelMatrix(modelMatrix);
+
+        gl.setViewMatrix(camera.viewMatrix);
+
+        gl.setProjectionMatrix(camera.projectionMatrix);
 
         if (modelName === "triangleStrip") {
 
@@ -155,7 +162,7 @@ class RenderTest {
             gl.drawElements(PRIM.TRIANGLES, model.numVertices);
         }
         if (modelName === "triangleTexture" || modelName === "quadTexture") {
-            gl.setTextureObject(this.ppm);
+            gl.setTextureObject(this.ppm);  // yeah we only have one texture in this right now.
             gl.setFragmentShader(uvShadeFragmentShader);
             gl.drawArrays(PRIM.TRIANGLES, numVertices);
         }

@@ -8,6 +8,8 @@ import { ModelManager } from './ModelManager'
 import { GL } from './MinimalGL'
 import RenderTest from './RenderTest';
 import ControlComponent from './ControlComponent';
+import CameraControlComponent from './CameraControlComponent';
+import Camera from './Camera';
 
 
 const modelManager = new ModelManager();
@@ -15,12 +17,13 @@ const maxPixelSize = 4;
 const frame = new FrameBuffer(320, 200);
 const borderColor = [10, 10, 10];
 const renderer = new RenderTest(frame, true, borderColor);
+let camera = new Camera();
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
   const [drawBorder, setDrawBorder] = useState(true);
-  const [selectedModel, setSelectedModel] = useState("triangleTexture");
+  const [selectedModel, setSelectedModel] = useState("");
   const [borderColor, setBorderColor] = useState([10, 10, 10]);
   const [pixelSize, setPixelSize] = useState(4);
 
@@ -35,6 +38,8 @@ function App() {
   const [scaleX, setScaleX] = useState(1);
   const [scaleY, setScaleY] = useState(1);
   const [scaleZ, setScaleZ] = useState(1);
+  const [frameNumber, setFrameNumber] = useState(0);
+
 
 
 
@@ -53,10 +58,16 @@ function App() {
   // make sure the render happens on start up.
   useEffect(() => {
     const modelNames = modelManager.getModels();
-    setSelectedModel(modelNames[0]);
-
+    setSelectedModel("triangleMesh2d");
+    camera.setViewPortWidth(200);
+    camera.setViewPortHeight(200);
   }, []);
 
+  function updateCamera(newCamera: Camera) {
+    camera = newCamera;
+    nextFrame();
+    setFrameNumber(frameNumber + 1);
+  }
 
   function updateTranslate(x: number, y: number, z: number) {
 
@@ -146,9 +157,11 @@ function App() {
     );
   }
 
+  function nextFrame() {
 
-  renderer.render(selectedModel, rotateX, rotateY, rotateZ, translateX, translateY, translateZ, scaleX, scaleY, scaleZ);
-
+    renderer.render(selectedModel, rotateX, rotateY, rotateZ, translateX, translateY, translateZ, scaleX, scaleY, scaleZ, camera);
+  }
+  nextFrame();
   /** 
    * Get the image from the frame buffer and draw it on the canvas
    * 
@@ -180,6 +193,8 @@ function App() {
     );
   }
 
+
+
   // draw the model
   // modelManager.drawModel(selectedModel, frame, drawBorder, borderColor);
 
@@ -190,8 +205,9 @@ function App() {
         <ModelSelectionComponent />
         <BorderControlComponent />
         <PixelSizeComponent />
-        <ControlComponent updateTranslate={updateTranslate} updateRotate={updateRotate} updateScale={updateScale}
-        />
+        <ControlComponent updateTranslate={updateTranslate} updateRotate={updateRotate} updateScale={updateScale} />
+        <CameraControlComponent camera={camera} updateCamera={updateCamera} />
+
       </header>
     </div>
   );

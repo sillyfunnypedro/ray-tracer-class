@@ -152,6 +152,10 @@ export class GL {
         this._matrices.viewMatrix = matrix;
     }
 
+    setModelViewMatrix(matrix: mat4) {
+        this._matrices.modelMatrix = matrix;
+    }
+
     setProjectionMatrix(matrix: mat4) {
         this._matrices.projectionMatrix = matrix;
     }
@@ -211,6 +215,9 @@ export class GL {
 
             let newDataVec4 = vec4.fromValues(newData[0], newData[1], newData[2], newData[3]);
 
+            // make the vector homogeneous
+            vec4.scale(newDataVec4, newDataVec4, 1 / newDataVec4[3]);
+
             vec4.transformMat4(newDataVec4, newDataVec4, this._matrices.toDevice);
             newData = [newDataVec4[0], newDataVec4[1], newDataVec4[2], newDataVec4[3]];
 
@@ -255,7 +262,24 @@ export class GL {
             activeData.normalOffset = this._normalOffset;
             activeData.uvSize = this._textureSize;
             activeData.uvOffset = this._textureOffset;
-            activeData.stride = this._stride + (this._outputVertexSize - this._vertexSize); // TODO this is horrible
+            activeData.stride = this._stride + (this._outputVertexSize - this._vertexSize);
+
+            // now if the vertex size has increased we need to increment the offset of all the 
+            // pieces of data that are present.
+
+            const offsetAdjust = (this._outputVertexSize - this._vertexSize);
+
+            if (activeData.colorSize > 0) {
+                activeData.colorOffset += offsetAdjust;
+            }
+
+            if (activeData.normalSize > 0) {
+                activeData.normalOffset += offsetAdjust;
+            }
+
+            if (activeData.uvSize > 0) {
+                activeData.uvOffset += offsetAdjust;
+            }
 
             GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices, this._frameBuffer, this._drawBorder, this._borderColor, activeData);
         }
