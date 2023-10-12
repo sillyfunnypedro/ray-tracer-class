@@ -21,8 +21,13 @@ export class Model {
     textureLength: number = 0;
     textureOffset: number = 0;
 
+    normalLength: number = 0;
+    normalOffset: number = 0;
+
     indexBuffer: number[];
     numVertices: number;
+
+    stride: number = 0;
 
 
     constructor(vertices: number[] = [],
@@ -32,8 +37,11 @@ export class Model {
         colorOffset: number = 0,
         textureLength: number = 0,
         textureOffset: number = 0,
+        normalLength: number = 0,
+        normalOffset: number = 0,
         indices: number[] = [],
-        numVertices: number = 0
+        numVertices: number = 0,
+        stride: number = 0
     ) {
         this.dataBuffer = vertices;
         this.vertexSize = vertexLength;
@@ -42,8 +50,11 @@ export class Model {
         this.colorLength = colorLength;
         this.textureLength = textureLength;
         this.textureOffset = textureOffset;
+        this.normalLength = normalLength;
+        this.normalOffset = normalOffset;
         this.indexBuffer = indices;
         this.numVertices = numVertices;
+        this.stride = stride;
     }
     static emptyModel(): Model {
         return new Model();
@@ -59,7 +70,9 @@ export class ModelManager {
         "triangleFan",
         "meshIndex",
         "triangleMesh",
-        "triangleMesh2d"
+        "triangleMesh2d",
+        "triangleTexture",
+        "quadTexture"
     ];
 
 
@@ -86,6 +99,10 @@ export class ModelManager {
                 return this.generateTriangles2d();
             case "meshIndex":
                 return this.generateTrianglesIndex();
+            case "triangleTexture":
+                return this.triangleTexture();
+            case "quadTexture":
+                return this.quadTexture();
             default:
                 return Model.emptyModel()
         }
@@ -180,6 +197,7 @@ export class ModelManager {
         result.colorLength = 3;
         result.colorOffset = 3;
         result.numVertices = numSegments * 2 + 2;
+        result.stride = 6
 
 
         return result;
@@ -242,6 +260,7 @@ export class ModelManager {
         result.colorLength = 3;
         result.colorOffset = 3;
         result.numVertices = numTriangles + 2
+        result.stride = 6
 
 
         return result;
@@ -312,6 +331,7 @@ export class ModelManager {
         result.colorLength = 3;
         result.colorOffset = 3;
         result.numVertices = numTriangles + 2
+        result.stride = 6
 
         return result;
 
@@ -413,6 +433,7 @@ export class ModelManager {
         result.colorLength = 3;
         result.colorOffset = 3;
         result.numVertices = numTriangles * 3;
+        result.stride = 6
 
         return result;
     }
@@ -509,7 +530,72 @@ export class ModelManager {
         result.colorLength = 3;
         result.colorOffset = 2;
         result.numVertices = numTriangles * 3;
+        result.stride = 5;
 
+        return result;
+    }
+
+    private triangleTexture(): Model {
+        // this triangle is used to show how UV mapping works
+        // three points each with x, y, z, u, v
+
+        const topOffset = 0.5; // for playing with in class
+        const dataBuffer: number[] = [
+            -0.0, 0.8, 0, topOffset, 1,
+            -0.8, -0.8, 0, 0, 0,
+            0.8, -0.8, 0, 1, 0,
+
+        ];
+        const scaleUV = 0.5;
+        for (let i = 0; i < dataBuffer.length; i++) {
+            if (i % 5 === 3) {
+                dataBuffer[i] *= scaleUV;
+            }
+            if (i % 5 === 4) {
+                dataBuffer[i] *= scaleUV;
+            }
+        }
+        let result: Model = new Model();
+        result.dataBuffer = dataBuffer;
+        result.vertexSize = 3;
+        result.vertexOffset = 0;
+        result.textureLength = 2;
+        result.textureOffset = 3;
+        result.numVertices = 3;
+        result.stride = 5
+        return result;
+    }
+
+    private quadTexture(): Model {
+        // this triangle is used to show how UV mapping works
+        // three points each with x, y, z, u, v
+
+        const weirdCorner = 0.8; // for playing with in class
+        const dataBuffer: number[] = [
+            -0.8, 0.8, 0, 0, 1,
+            -0.8, -0.8, 0, 0, 0,
+            0.8, -0.8, 0, 1, 0,
+            -0.8, 0.8, 0, 0, 1,
+            0.8, -0.8, 0, 1, 0,
+            weirdCorner, weirdCorner, 0, 1, 1
+        ];
+        const scaleUV = 1;
+        for (let i = 0; i < dataBuffer.length; i++) {
+            if (i % 5 === 3) {
+                dataBuffer[i] *= scaleUV;
+            }
+            if (i % 5 === 4) {
+                dataBuffer[i] *= scaleUV;
+            }
+        }
+        let result: Model = new Model();
+        result.dataBuffer = dataBuffer;
+        result.vertexSize = 3;
+        result.vertexOffset = 0;
+        result.textureLength = 2;
+        result.textureOffset = 3;
+        result.numVertices = 6;
+        result.stride = 5
         return result;
     }
 }

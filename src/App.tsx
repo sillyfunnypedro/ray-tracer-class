@@ -18,7 +18,7 @@ function App() {
 
   const [frame, setFrame] = useState(new FrameBuffer(320, 200));
   const [drawBorder, setDrawBorder] = useState(true);
-  const [selectedModel, setSelectedModel] = useState("");
+  const [selectedModel, setSelectedModel] = useState("triangleTexture");
   const [borderColor, setBorderColor] = useState([10, 10, 10]);
   const [pixelSize, setPixelSize] = useState(4);
 

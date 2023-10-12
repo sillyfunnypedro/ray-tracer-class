@@ -2,6 +2,8 @@ import { GL, PRIM, GL_COLOR_BUFFER_BIT, MatricesGL, FragmentGL } from './Minimal
 import FrameBuffer from './FrameBuffer'
 import { ModelManager, Model } from './ModelManager';
 import { mat4, vec4 } from 'gl-matrix'
+import PPM from './PPM';
+import { imageSource } from './ImageSource';
 
 
 function defaultFragmentShader(fragParameters: FragmentGL): number[] {
@@ -33,6 +35,16 @@ function defaultVertexShader(vertex: number[], matrices: MatricesGL): number[] {
 
 }
 
+function uvShadeFragmentShader(fragParameters: FragmentGL): number[] {
+    let uv = fragParameters.uv;
+    let result: number[] = [];
+    if (fragParameters.PPMTexture !== null) {
+        let textureResult = fragParameters.PPMTexture.sampler2D(uv[0], uv[1]);
+        result = textureResult;
+    }
+    return result;
+}
+
 
 
 
@@ -42,12 +54,16 @@ class RenderTest {
     modelManager: ModelManager = new ModelManager();
     drawBorder: boolean;
     borderColorArray: number[];
+    ppm: PPM = new PPM();
+
+
 
 
     constructor(frameBuffer: FrameBuffer, drawBorder: boolean, borderColorArray: number[]) {
         this.frameBuffer = frameBuffer;
         this.drawBorder = drawBorder;
         this.borderColorArray = borderColorArray;
+        this.ppm.loadFileFromString(imageSource);
     }
 
     render(modelName: string, rotateX: number, rotateY: number, rotateZ: number, translateX: number, translateY: number, translateZ: number, scaleX: number, scaleY: number, scaleZ: number) {
@@ -72,15 +88,22 @@ class RenderTest {
 
         gl.setDataBuffer(dataBuffer);
 
-        // This is the same idea as OpenGL's VAO but we provide a more readable API
-        gl.setColorSize(colorSize);
-        gl.setColorOffset(colorOffset);
 
-        gl.setVertexSize(vertexSize);
-        gl.setVertexOffset(vertexOffset);
+        // there always have to be vertex data
+        gl.setVertexSize(model.vertexSize);
+        gl.setVertexOffset(model.vertexOffset);
+
+        gl.setColorSize(model.colorLength);
+        gl.setColorOffset(model.colorOffset);
+
+        gl.setTextureSize(model.textureLength);
+        gl.setTextureOffset(model.textureOffset);
+
+        gl.setNormalSize(model.normalLength);
+        gl.setNormalOffset(model.normalOffset);
 
         // it is important here to add up all the elements that are in the data.
-        gl.setStride(colorSize + vertexSize);
+        gl.setStride(model.stride);
 
         // here is our vertex shader
         gl.setVertexShader(defaultVertexShader);
@@ -103,7 +126,11 @@ class RenderTest {
 
         let modelMatrix = mat4.create();
 
-        // TODO what order will you do your scale/ translate  rotate in.
+        mat4.translate(modelMatrix, modelMatrix, [translateX, translateY, translateZ]);
+        mat4.rotate(modelMatrix, modelMatrix, rotateX, [1, 0, 0]);
+        mat4.rotate(modelMatrix, modelMatrix, rotateY, [0, 1, 0]);
+        mat4.rotate(modelMatrix, modelMatrix, rotateZ, [0, 0, 1]);
+        mat4.scale(modelMatrix, modelMatrix, [scaleX, scaleY, scaleZ]);
 
         gl.setModelMatrix(modelMatrix);
 
@@ -127,6 +154,12 @@ class RenderTest {
             gl.setIndexBuffer(indexBuffer);
             gl.drawElements(PRIM.TRIANGLES, model.numVertices);
         }
+        if (modelName === "triangleTexture" || modelName === "quadTexture") {
+            gl.setTextureObject(this.ppm);
+            gl.setFragmentShader(uvShadeFragmentShader);
+            gl.drawArrays(PRIM.TRIANGLES, numVertices);
+        }
+
 
 
 

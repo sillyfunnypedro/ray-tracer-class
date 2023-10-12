@@ -5,8 +5,9 @@
 
 import Color from "./Color";
 import FrameBuffer from "./FrameBuffer";
-import GeometricProcessor from "./GeometricProcessor";
+import GeometricProcessor, { ActiveData } from "./GeometricProcessor";
 import { mat4, vec4 } from "gl-matrix";
+import PPM from "./PPM";
 // types for drawArrays
 export enum PRIM {
     POINTS,
@@ -35,6 +36,7 @@ export class FragmentGL {
     fromEye: number[] = [];
     fromLight: number[] = [];
     depth: number = 0;
+    PPMTexture: PPM | null = null;
 }
 
 
@@ -46,12 +48,11 @@ export class GL {
     _geometricProcessor: GeometricProcessor = new GeometricProcessor();
     _dataBuffer: number[] = [];
     _indexBuffer: number[] = [];
-    _inputVertexSize: number = 3;
-    _inputColorSize: number = 3;
+    _vertexSize: number = 0;
+    _outputVertexSize: number = 3;
     _stride: number = 0;
     _backgroundColor: Color = new Color(0, 0, 0);
     _matrices: MatricesGL = new MatricesGL();
-    _vertexSize: number = 0;
     _vertexOffset: number = 0;
     _colorSize: number = 0;
     _colorOffset: number = 0;
@@ -59,6 +60,7 @@ export class GL {
     _normalOffset: number = 0;
     _textureSize: number = 0;
     _textureOffset: number = 0;
+    _textureObject: PPM | null = null;
 
     // Non openGL stuff for our demo
     _drawBorder: boolean = false;
@@ -98,7 +100,7 @@ export class GL {
     }
 
     setVertexSize(size: number) {
-        this._inputVertexSize = size;
+        this._vertexSize = size;
     }
 
     setVertexOffset(offset: number) {
@@ -154,6 +156,11 @@ export class GL {
         this._matrices.projectionMatrix = matrix;
     }
 
+    setTextureObject(textureObject: PPM) {
+        this._textureObject = textureObject;
+        GeometricProcessor.PPMTexture = textureObject;
+    }
+
 
 
 
@@ -168,6 +175,8 @@ export class GL {
         mat4.translate(this._matrices.toDevice, this._matrices.toDevice, [width / 2, height / 2, 0]);
         mat4.scale(this._matrices.toDevice, this._matrices.toDevice, [width / 2, -height / 2, 1]);
     }
+
+
 
 
     clear(mask: number) { // TODO: implement alpha
@@ -193,14 +202,12 @@ export class GL {
         let resultingDataBuffer: number[] = [];
         for (let vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
 
-            let vertexData = getData.call(this, vertexIndex, this._inputVertexSize, this._vertexOffset);
-            let colorData = getData.call(this, vertexIndex, this._inputColorSize, this._colorOffset);
+            let vertexData = getData.call(this, vertexIndex, this._vertexSize, this._vertexOffset);
+            let colorData = getData.call(this, vertexIndex, this._colorSize, this._colorOffset);
+            let uvData = getData.call(this, vertexIndex, this._textureSize, this._textureOffset);
+            let normalData = getData.call(this, vertexIndex, this._normalSize, this._normalOffset);
 
-            // This is where we need the call to the vertex shader.
-            let newData = [0, 0, 0, 1]
-            for (let i = 0; i < vertexData.length; i++) {
-                newData[i] = vertexData[i];
-            }
+            let newData = vertexShader(vertexData, this._matrices); // assume this returns a 4 dimensional vector
 
             let newDataVec4 = vec4.fromValues(newData[0], newData[1], newData[2], newData[3]);
 
@@ -208,10 +215,14 @@ export class GL {
             newData = [newDataVec4[0], newDataVec4[1], newDataVec4[2], newDataVec4[3]];
 
             resultingDataBuffer = resultingDataBuffer.concat(newData[0], newData[1], newData[2]);
-            resultingDataBuffer = resultingDataBuffer.concat(colorData);
+            // TODO fix this to account for normals
 
-            // for now we use 3 for x, y, z since our backend assumes a 3d coordinate system.
+            this._outputVertexSize = 3;
+            resultingDataBuffer = resultingDataBuffer.concat(colorData);
+            resultingDataBuffer = resultingDataBuffer.concat(uvData);
+            resultingDataBuffer = resultingDataBuffer.concat(normalData);
         }
+
         return resultingDataBuffer;
 
     }
@@ -234,7 +245,19 @@ export class GL {
         let resultingDataBuffer = this.processVertices(numVertices);
 
         if (primitive == PRIM.TRIANGLES) {
-            GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices, this._frameBuffer, this._drawBorder, this._borderColor);
+            let activeData = new ActiveData();
+
+            activeData.vertexSize = this._outputVertexSize;
+            activeData.vertexOffset = this._vertexOffset;
+            activeData.colorSize = this._colorSize;
+            activeData.colorOffset = this._colorOffset;
+            activeData.normalSize = this._normalSize;
+            activeData.normalOffset = this._normalOffset;
+            activeData.uvSize = this._textureSize;
+            activeData.uvOffset = this._textureOffset;
+            activeData.stride = this._stride + (this._outputVertexSize - this._vertexSize); // TODO this is horrible
+
+            GeometricProcessor.fillTriangles(resultingDataBuffer, numVertices, this._frameBuffer, this._drawBorder, this._borderColor, activeData);
         }
         if (primitive == PRIM.TRIANGLE_STRIP) {
             GeometricProcessor.fillTriangleStrip(resultingDataBuffer, numVertices, this._frameBuffer, this._drawBorder, this._borderColor);
