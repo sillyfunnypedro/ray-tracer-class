@@ -18,5 +18,19 @@
             "command": "npm start",
             "cwd": "${workspaceFolder}"
         },
+        {
+            "type": "node-terminal",
+            "name": "Jest Sphere",
+            "request": "launch",
+            "command": "npx jest Sphere",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
+            "name": "Jest Shape",
+            "request": "launch",
+            "command": "npx jest Shape",
+            "cwd": "${workspaceFolder}"
+        },
     ]
 }

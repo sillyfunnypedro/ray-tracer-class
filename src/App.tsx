@@ -7,6 +7,7 @@ import GeometricProcessor from './GeometricProcessor'
 import { ModelManager } from './ModelManager'
 import { GL } from './MinimalGL'
 import RenderTest from './RenderTest';
+import RayTracer from './RayTracer'
 import ControlComponent from './ControlComponent';
 import CameraControlComponent from './CameraControlComponent';
 import Camera from './Camera';
@@ -16,7 +17,7 @@ const modelManager = new ModelManager();
 const maxPixelSize = 4;
 const frame = new FrameBuffer(320, 200);
 const borderColor = [10, 10, 10];
-const renderer = new RenderTest(frame, true, borderColor);
+const renderer = new RayTracer(frame);
 let camera = new Camera();
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -78,7 +79,6 @@ function App() {
   }
 
   function updateShader(shader: string) {
-    renderer.setShader(shader);
     nextFrame();
     setFrameNumber(frameNumber + 1);
   }
@@ -165,7 +165,7 @@ function App() {
 
   function nextFrame() {
 
-    renderer.render(selectedModel, rotateX, rotateY, rotateZ, translateX, translateY, translateZ, scaleX, scaleY, scaleZ, camera);
+    renderer.render(camera);
   }
   nextFrame();
   /** 
