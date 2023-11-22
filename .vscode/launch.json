@@ -20,6 +20,13 @@
         },
         {
             "type": "node-terminal",
+            "name": "TEST ALL",
+            "request": "launch",
+            "command": "npx jest ",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
             "name": "Jest Sphere",
             "request": "launch",
             "command": "npx jest Sphere",
