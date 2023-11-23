@@ -37,16 +37,34 @@ class Scene {
      */
     backgroundColor: vec3 = vec3.create();
 
-    computeShading(intersection: Intersection): Color {
+    /**
+     * 
+     * Number of ray generations to compute 
+     */
+    rayDepth: number = 1;
+
+    /**
+     * 
+     * Epsilon value for ray intersection to avoid self intersection
+     */
+    epsilon: number = 0.0001;
+
+    computeShading(intersection: Intersection): vec3 {
         let color = vec3.create()
         for (let light of this.lights) {
             let lightColor = vec3.create();
             vec3.copy(lightColor, light.color);
             vec3.scale(lightColor, lightColor, light.intensity);
 
+            // ambient color
+            let ambientColor = vec3.create();
+            vec3.copy(ambientColor, intersection.hitShape!.color);
+            vec3.scale(ambientColor, ambientColor, intersection.hitShape!.ambient);
+
+
             let lightDirection = vec3.create();
             vec3.copy(lightDirection, light.position);
-            vec3.subtract(lightDirection, intersection.position, lightDirection);
+            vec3.subtract(lightDirection, lightDirection, intersection.position,);
             vec3.normalize(lightDirection, lightDirection);
 
             let normal = vec3.create();
@@ -58,41 +76,63 @@ class Scene {
             let diffuseColor = vec3.create();
             vec3.multiply(diffuseColor, lightColor, intersection.hitShape!.color);
             vec3.scale(diffuseColor, diffuseColor, diffuseIntensity);
+            vec3.scale(diffuseColor, diffuseColor, intersection.hitShape!.diffuse);
 
-            let reflectedRay = Ray.create();
-            vec3.copy(reflectedRay.origin, intersection.position);
-            vec3.copy(reflectedRay.direction, intersection.reflectedRay.direction);
+            // calculate the reflected ray 
+
+            // reflect the ray around the normal
+            const reflectedRay = intersection.reflectedRay;
+
+            vec3.normalize(reflectedRay.direction, reflectedRay.direction);
+
+            // now use the reflected ray direction to calculate the specular intensity
+
+
+            // if the generation the ray that hit us is one less that the depth then we do not do a reflection or refraction call
+            if (intersection.generation < this.rayDepth - 1) {
+                let reflectedColor = this.intersect(reflectedRay, intersection.hitShape!);
+                vec3.scale(reflectedColor, reflectedColor, intersection.hitShape!.specular);
+            }
 
             let specularIntensity = Math.pow(Math.max(vec3.dot(reflectedRay.direction, lightDirection), 0), intersection.hitShape!.shininess);
 
             let specularColor = vec3.create();
             vec3.multiply(specularColor, lightColor, intersection.hitShape!.color);
             vec3.scale(specularColor, specularColor, specularIntensity);
+            vec3.scale(specularColor, specularColor, intersection.hitShape!.specular);
 
             vec3.add(color, color, diffuseColor);
             vec3.add(color, color, specularColor);
+            vec3.add(color, color, ambientColor);
         }
 
-        return Color.createFromVec3(color);
+        return color;
     }
 
 
     /**
      * intersect
      */
-    intersect(ray: Ray): Color {
+    intersect(ray: Ray, originShape: Shape | null = null): vec3 {
         let distance = Infinity;
         let currentIntersection: Intersection | null = null;
 
         for (let shape of this.shapes) {
-            let nextIntersection = shape.intersect(ray);
+            if (shape === originShape) {
+                continue;
+            }
+            let nextIntersection = shape.intersect(ray,);
             if (nextIntersection.hitDistance !== Number.MAX_VALUE && nextIntersection.hitDistance < distance) {
+
                 distance = nextIntersection.hitDistance;
                 currentIntersection = nextIntersection;
+
+                shape.intersect(ray);
+
             }
         }
         if (!currentIntersection) {
-            return new Color(this.backgroundColor[0], this.backgroundColor[1], this.backgroundColor[2]);
+            return this.backgroundColor;
         }
         let color = this.computeShading(currentIntersection);
 

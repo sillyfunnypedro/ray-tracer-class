@@ -41,6 +41,12 @@ class Intersection {
      */
     hitShape: Shape | null = null;
 
+    /**
+     * 
+     * generation of the ray that hit us
+     */
+    generation: number = 0;
+
     static create(): Intersection {
         let position = vec3.create();
         let normal = vec3.create();

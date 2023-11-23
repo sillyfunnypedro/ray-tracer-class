@@ -10,8 +10,8 @@ import CameraControlComponent from './CameraControlComponent';
 import Camera from './Camera';
 
 
-const maxPixelSize = 4;
-const frame = new FrameBuffer(320, 240);
+const maxPixelSize = 2;
+const frame = new FrameBuffer(640, 480);
 const borderColor = [10, 10, 10];
 const renderer = new RayTracer(frame);
 let camera = new Camera();
@@ -21,7 +21,7 @@ function App() {
 
   const [selectedModel, setSelectedModel] = useState("");
   const [borderColor, setBorderColor] = useState([10, 10, 10]);
-  const [pixelSize, setPixelSize] = useState(4);
+  const [pixelSize, setPixelSize] = useState(2);
 
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);

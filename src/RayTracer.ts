@@ -43,7 +43,7 @@ class RayTracer {
         const screenPosition = vec3.create();
 
         // calculate the width based on the near plane and the field of view
-        const width = camera.nearPlane * Math.tan(camera.fieldOfView / 180 * Math.PI);
+        const width = 2 * camera.nearPlane * Math.tan((camera.fieldOfView / 2) / 180 * Math.PI);
 
 
         // calculate the normalized eye vector
@@ -139,7 +139,9 @@ class RayTracer {
             for (let j = 0; j < this._frameBuffer.width; j++) {
 
 
-                const screenPosition = this.getScreenPosition2(j, i, camera);
+
+
+                const screenPosition = this.getScreenPosition2(j, this._frameBuffer.height - i, camera);
                 let rayDirection = vec3.subtract(vec3.create(), screenPosition, eyePosition);
 
                 // make the ray direction always point to the center of the screen
@@ -153,9 +155,17 @@ class RayTracer {
                 if (intersect === null || intersect === undefined) {
                     throw new Error("intersect is null or undefined");
                 }
-                let color = scene.intersect(ray);
+                let color = scene.intersect(ray, null);
+                // this is for debugging and finding a single pixel.
 
-                this._frameBuffer.pixels[i][j] = color;
+                // uncomment this to find a single pixel and then put a break point on the next call to intersect.
+                if (i === this._frameBuffer.height / 2 && j === this._frameBuffer.width / 2) {
+                    console.log("center");
+                    //this._frameBuffer.pixels[i][j] = Color.createFromVec3(vec3.fromValues(1, 0, 0));
+                    //let color = scene.intersect(ray);
+                    continue;
+                }
+                this._frameBuffer.pixels[i][j] = Color.createFromVec3(color);
             }
         }
     }

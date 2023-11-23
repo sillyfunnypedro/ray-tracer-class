@@ -3,7 +3,7 @@
  * @module     Shape
  * @desc       Shape class extends Object3D class and is extended by all shapes. 
  * */
-import { vec3, mat4 } from 'gl-matrix';
+import { vec3, mat4, mat3 } from 'gl-matrix';
 import Ray from './Ray';
 import Light from './Light';
 import Intersection from './Intersection';
@@ -83,6 +83,7 @@ abstract class Shape {
      * @function get ModelMatrix
      */
     getModelMatrix(): mat4 {
+        // rotate, translate, scale
         mat4.multiply(this.modelMatrix, this.translationMatrix, this.rotationMatrix);
         mat4.multiply(this.modelMatrix, this.modelMatrix, this.scaleMatrix);
         return this.modelMatrix;
@@ -92,10 +93,23 @@ abstract class Shape {
     getRayInObjectSpace(ray: Ray): Ray {
         let inverseModelMatrix = mat4.create();
         mat4.invert(inverseModelMatrix, this.getModelMatrix());
+
+
         let origin = vec3.create();
-        let direction = vec3.create();
         vec3.transformMat4(origin, ray.origin, inverseModelMatrix);
-        vec3.transformMat4(direction, ray.direction, inverseModelMatrix);
+
+        let normalMatrix = mat3.create();
+        mat3.fromMat4(normalMatrix, inverseModelMatrix);
+
+        let inverseNormalMatrix = mat3.create();
+        mat3.invert(inverseNormalMatrix, normalMatrix);
+
+        let transposedInverseNormalMatrix = mat3.create();
+        mat3.transpose(transposedInverseNormalMatrix, inverseNormalMatrix);
+
+        let direction = vec3.create();
+        vec3.transformMat3(direction, ray.direction, transposedInverseNormalMatrix);
+        vec3.normalize(direction, direction);
 
         const resultinRay = new Ray(origin, direction);
         return resultinRay;
@@ -109,13 +123,28 @@ abstract class Shape {
         return pointWorldSpace;
     }
 
+    // this transformation needs to first extract the rotation and scale from the model matrix
+    // then it needs to apply the inverse of those transformations to the normal
     transformNormalToWorldSpace(normal: vec3): vec3 {
-        let inverseModelMatrix = mat4.create();
-        mat4.invert(inverseModelMatrix, this.getModelMatrix());
+        let modelMatrix = this.getModelMatrix();
+        let normalMatrix = mat3.create();
+        mat3.fromMat4(normalMatrix, modelMatrix);
+
+        let inverseNormalMatrix = mat3.create();
+        mat3.invert(inverseNormalMatrix, normalMatrix);
+
+        let transposedInverseNormalMatrix = mat3.create();
+        mat3.transpose(transposedInverseNormalMatrix, inverseNormalMatrix);
+
         let normalWorldSpace = vec3.create();
-        vec3.transformMat4(normalWorldSpace, normal, inverseModelMatrix);
+
+        vec3.transformMat3(normalWorldSpace, normal, transposedInverseNormalMatrix);
+        vec3.normalize(normalWorldSpace, normalWorldSpace);
         return normalWorldSpace;
     }
+
+
+
 
     getReflectedRay(ray: Ray, normal: vec3, intersectionPoint: vec3): Ray {
         let reflectedRay = Ray.create();
