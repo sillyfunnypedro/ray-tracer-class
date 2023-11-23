@@ -10,8 +10,8 @@ import CameraControlComponent from './CameraControlComponent';
 import Camera from './Camera';
 
 
-const maxPixelSize = 6;
-const frame = new FrameBuffer(160, 120);
+const maxPixelSize = 2;
+const frame = new FrameBuffer(640, 320);
 const borderColor = [10, 10, 10];
 const renderer = new RayTracer(frame);
 let camera = new Camera();
