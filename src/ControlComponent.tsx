@@ -345,16 +345,7 @@ function ControlComponent({
                         <th className="rightAlign">
                             <hr className="lineWidth" />
 
-                            {makeTranslateSliders()}
-                            <hr className="lineWidth" />
-                            {makeRotationSliders()}
-                            <hr className="lineWidth" />
-                            {makeScaleSliders()}
-                            <hr className="lineWidth" />
-                            {makeControlButtons()}
-                            <hr className="lineWidth" />
-                            {makeShaderSelector()}
-                            <hr className="lineWidth" />
+
                         </th>
                     </tr>
 

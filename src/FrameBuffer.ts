@@ -1,6 +1,8 @@
 /**
  * 
  * The FrameBuffer class is used to create an array of pixels that can be set with the function setPixel(x, y, color:Color)
+ * 
+ * colors are between 0 and 1
  */
 
 import Color from "./Color";
@@ -59,9 +61,9 @@ class FrameBuffer {
 
 
                     for (let l = 0; l < pixelSize; l++) {
-                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4] = this.pixels[i][j].r;
-                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4 + 1] = this.pixels[i][j].g;
-                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4 + 2] = this.pixels[i][j].b;
+                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4] = this.pixels[i][j].r * 255;
+                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4 + 1] = this.pixels[i][j].g * 255;
+                        data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4 + 2] = this.pixels[i][j].b * 255;
                         data[((i * pixelSize + k) * this.width + j) * 4 * pixelSize + l * 4 + 3] = 255;
                     }
                 }

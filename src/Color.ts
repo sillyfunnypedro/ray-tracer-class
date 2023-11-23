@@ -3,6 +3,7 @@
  * @description
  * Color module.
  */
+import { vec3 } from 'gl-matrix';
 
 class Color {
     r: number;
@@ -59,6 +60,10 @@ class Color {
         const leftColor = Color.interpolate(color0, color1, s);
         const rightColor = Color.interpolate(color3, color2, s);
         return Color.interpolate(leftColor, rightColor, t);
+    }
+
+    static createFromVec3(vec: vec3): Color {
+        return new Color(vec[0], vec[1], vec[2]);
     }
 }
 

@@ -191,7 +191,7 @@ function App() {
         {bufferImage()}
         <ModelSelectionComponent />
         <PixelSizeComponent />
-        <ControlComponent updateTranslate={updateTranslate} updateRotate={updateRotate} updateScale={updateScale} updateShader={updateShader} />
+
         <CameraControlComponent camera={camera} updateCamera={updateCamera} />
 
       </header>
