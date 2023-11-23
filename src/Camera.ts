@@ -35,8 +35,8 @@ class Camera {
         this.lookAt = vec3.fromValues(0, 0, 0);
         this.upVector = vec3.fromValues(0, 1, 0);
         this.aspectRatio = 1;
-        this.fieldOfView = 90;
-        this.nearPlane = 0.1;
+        this.fieldOfView = 45;
+        this.nearPlane = 3;
         this.farPlane = 100;
         this.viewPortWidth = 1;
         this.viewPortHeight = 1;

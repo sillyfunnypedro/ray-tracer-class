@@ -1,15 +1,24 @@
 import Shape from './Shape';
 import Ray from './Ray';
 import { vec3 } from 'gl-matrix';
+import Intersection from './Intersection';
+
+class TestShape extends Shape {
+    intersect(ray: Ray): Intersection {
+        throw new Error("Method not implemented.");
+
+    }
+
+}
 
 describe('Shape', () => {
-    let shape: Shape;
+    let shape: TestShape;
     let ray: Ray;
     let normal: vec3;
     let intersectionPoint: vec3;
 
     beforeEach(() => {
-        shape = new Shape(); // Assuming Shape has a default constructor
+        shape = new TestShape(); // Assuming Shape has a default constructor
         ray = new Ray(vec3.fromValues(0, 0, -10), vec3.fromValues(0, 0, 1));
         normal = vec3.fromValues(0, 0, 1);
         intersectionPoint = vec3.fromValues(0, 0, 0);

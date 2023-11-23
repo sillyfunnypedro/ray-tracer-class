@@ -33,7 +33,7 @@ class Color {
         const aHex = aInt.toString(16).padStart(2, "0")
 
         // Combine the hex strings into a single string with a "#" prefix
-        if (length == 4) {
+        if (length === 4) {
             return `${rHex}${gHex}${bHex}${aHex}`
         }
         return `#${rHex}${gHex}${bHex}`;

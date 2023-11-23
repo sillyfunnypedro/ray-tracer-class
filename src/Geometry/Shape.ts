@@ -5,8 +5,10 @@
  * */
 import { vec3, mat4 } from 'gl-matrix';
 import Ray from './Ray';
+import Light from './Light';
+import Intersection from './Intersection';
 
-class Shape {
+abstract class Shape {
 
     color: vec3;
     ambient: number;
@@ -124,9 +126,19 @@ class Shape {
         return reflectedRay;
     }
 
+    calculateShading(ray: Ray, intersection: Intersection, light: Light): vec3 {
+        let shadingColor = vec3.create();
+        let lightDirection = vec3.create();
+        vec3.normalize(lightDirection, vec3.subtract(lightDirection, light.position, intersection.position));
+        let normal = intersection.normal;
+        let diffuseTerm = Math.max(0, vec3.dot(lightDirection, normal));
+        let reflectedRay = this.getReflectedRay(ray, normal, intersection.position);
+        let specularTerm = Math.pow(Math.max(0, vec3.dot(reflectedRay.direction, lightDirection)), this.shininess);
+        vec3.scale(shadingColor, this.color, this.ambient + this.diffuse * diffuseTerm + this.specular * specularTerm);
+        return shadingColor;
+    }
 
-
-
+    abstract intersect(ray: Ray): Intersection;
 
 }
 

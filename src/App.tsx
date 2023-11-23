@@ -3,19 +3,15 @@ import './App.css';
 import Color from './Color';
 import FrameBuffer from './FrameBuffer'
 import FrameBufferComponent from './FrameBufferComponent'
-import GeometricProcessor from './GeometricProcessor'
-import { ModelManager } from './ModelManager'
-import { GL } from './MinimalGL'
-import RenderTest from './RenderTest';
+import Scenes from './Scenes'
 import RayTracer from './RayTracer'
 import ControlComponent from './ControlComponent';
 import CameraControlComponent from './CameraControlComponent';
 import Camera from './Camera';
 
 
-const modelManager = new ModelManager();
 const maxPixelSize = 4;
-const frame = new FrameBuffer(320, 200);
+const frame = new FrameBuffer(320, 240);
 const borderColor = [10, 10, 10];
 const renderer = new RayTracer(frame);
 let camera = new Camera();
@@ -23,7 +19,6 @@ function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
-  const [drawBorder, setDrawBorder] = useState(true);
   const [selectedModel, setSelectedModel] = useState("");
   const [borderColor, setBorderColor] = useState([10, 10, 10]);
   const [pixelSize, setPixelSize] = useState(4);
@@ -58,8 +53,10 @@ function App() {
 
   // make sure the render happens on start up.
   useEffect(() => {
-    const modelNames = modelManager.getModels();
-    setSelectedModel("triangleMesh2d");
+
+    const modelNames = Scenes.getScenes();
+
+    setSelectedModel("sphere");
     camera.setViewPortWidth(200);
     camera.setViewPortHeight(200);
   }, []);
@@ -102,7 +99,7 @@ function App() {
   }
   // a Component that calls models.getModels and produces buttons for selecting models
   function ModelSelectionComponent() {
-    const modelNames = modelManager.getModels();
+    const modelNames = Scenes.getScenes();
 
     return (
       <div>
@@ -115,23 +112,7 @@ function App() {
     );
   }
 
-  function BorderControlComponent() {
-    return (
-      <div>
-        <input
-          type="checkbox"
-          id="border"
-          name="border"
-          value="border"
-          checked={drawBorder}
-          onChange={(event) => setDrawBorder(event.target.checked)}
-        />
-        <label htmlFor="border" style={{ fontSize: "14px" }}>
-          Draw Border
-        </label>
-      </div>
-    );
-  }
+
 
   /**
    *  A callback to handle changes to the pixel size slider
@@ -165,7 +146,7 @@ function App() {
 
   function nextFrame() {
 
-    renderer.render(camera);
+    renderer.render(camera, selectedModel);
   }
   nextFrame();
   /** 
@@ -209,7 +190,6 @@ function App() {
       <header className="App-header">
         {bufferImage()}
         <ModelSelectionComponent />
-        <BorderControlComponent />
         <PixelSizeComponent />
         <ControlComponent updateTranslate={updateTranslate} updateRotate={updateRotate} updateScale={updateScale} updateShader={updateShader} />
         <CameraControlComponent camera={camera} updateCamera={updateCamera} />
