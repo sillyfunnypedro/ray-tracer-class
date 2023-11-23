@@ -116,10 +116,8 @@ abstract class Shape {
     }
 
     transformPointToWorldSpace(point: vec3): vec3 {
-        let inverseModelMatrix = mat4.create();
-        mat4.invert(inverseModelMatrix, this.getModelMatrix());
         let pointWorldSpace = vec3.create();
-        vec3.transformMat4(pointWorldSpace, point, inverseModelMatrix);
+        vec3.transformMat4(pointWorldSpace, point, this.getModelMatrix());
         return pointWorldSpace;
     }
 

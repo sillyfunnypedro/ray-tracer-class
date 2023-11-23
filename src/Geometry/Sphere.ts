@@ -74,7 +74,8 @@ export class Sphere extends Shape {
 
         // now that we have the world point and the normal we call the shape function getReflectedRay
 
-        let reflectedRay = this.getReflectedRay(rayOriginObjectSpace, normal, worldSpacePoint);
+        let reflectedRay = this.getReflectedRay(ray, normal, worldSpacePoint);
+        reflectedRay.generation = ray.generation + 1;
 
 
 
@@ -84,6 +85,7 @@ export class Sphere extends Shape {
         intersection.hitDistance = resultingT;
         intersection.hitShape = this;
         intersection.reflectedRay = reflectedRay;
+        intersection.generation = ray.generation + 1;
 
 
         return intersection;

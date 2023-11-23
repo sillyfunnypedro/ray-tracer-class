@@ -64,7 +64,7 @@ class Scene {
 
             let lightDirection = vec3.create();
             vec3.copy(lightDirection, light.position);
-            vec3.subtract(lightDirection, lightDirection, intersection.position,);
+            vec3.subtract(lightDirection, lightDirection, intersection.position);
             vec3.normalize(lightDirection, lightDirection);
 
             let normal = vec3.create();
@@ -86,12 +86,15 @@ class Scene {
             vec3.normalize(reflectedRay.direction, reflectedRay.direction);
 
             // now use the reflected ray direction to calculate the specular intensity
-
+            let reflectedColor = vec3.create();
 
             // if the generation the ray that hit us is one less that the depth then we do not do a reflection or refraction call
-            if (intersection.generation < this.rayDepth - 1) {
-                let reflectedColor = this.intersect(reflectedRay, intersection.hitShape!);
-                vec3.scale(reflectedColor, reflectedColor, intersection.hitShape!.specular);
+            if (intersection.generation < this.rayDepth && intersection.hitShape!.reflectivity > 0) {
+
+                reflectedRay.generation = intersection.generation + 1;
+                reflectedColor = this.intersect(reflectedRay, intersection.hitShape!);
+                vec3.scale(reflectedColor, reflectedColor, intersection.hitShape!.reflectivity);
+
             }
 
             let specularIntensity = Math.pow(Math.max(vec3.dot(reflectedRay.direction, lightDirection), 0), intersection.hitShape!.shininess);
@@ -104,6 +107,7 @@ class Scene {
             vec3.add(color, color, diffuseColor);
             vec3.add(color, color, specularColor);
             vec3.add(color, color, ambientColor);
+            vec3.add(color, color, reflectedColor);
         }
 
         return color;
@@ -123,9 +127,10 @@ class Scene {
             }
             let nextIntersection = shape.intersect(ray,);
             if (nextIntersection.hitDistance !== Number.MAX_VALUE && nextIntersection.hitDistance < distance) {
-
-                distance = nextIntersection.hitDistance;
-                currentIntersection = nextIntersection;
+                if (nextIntersection.hitDistance > 0) {
+                    distance = nextIntersection.hitDistance;
+                    currentIntersection = nextIntersection;
+                }
 
                 shape.intersect(ray);
 
