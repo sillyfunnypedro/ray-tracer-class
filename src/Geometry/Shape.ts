@@ -22,6 +22,9 @@ abstract class Shape {
     rotationMatrix: mat4;
     translationMatrix: mat4;
     scaleMatrix: mat4;
+    boundingBoxOrigin: vec3 = vec3.create();
+    boundingBoxSize: vec3 = vec3.create();
+    boundingBoxExists: boolean = false;
 
     constructor() {
         this.color = vec3.create();
@@ -45,6 +48,7 @@ abstract class Shape {
      */
     translate(translation: vec3) {
         mat4.translate(this.translationMatrix, this.translationMatrix, translation);
+        this.computeBoundingBox();
     }
 
     /**
@@ -53,6 +57,7 @@ abstract class Shape {
      */
     rotateX(angle: number) {
         mat4.rotateX(this.rotationMatrix, this.rotationMatrix, angle * Math.PI / 180);
+        this.computeBoundingBox();
     }
 
     /**
@@ -61,6 +66,7 @@ abstract class Shape {
      */
     rotateY(angle: number) {
         mat4.rotateY(this.rotationMatrix, this.rotationMatrix, angle * Math.PI / 180);
+        this.computeBoundingBox();
     }
 
     /**
@@ -69,6 +75,7 @@ abstract class Shape {
      */
     rotateZ(angle: number) {
         mat4.rotateZ(this.rotationMatrix, this.rotationMatrix, angle * Math.PI / 180);
+        this.computeBoundingBox();
     }
 
     /**
@@ -77,6 +84,7 @@ abstract class Shape {
      */
     scale(scale: vec3) {
         mat4.scale(this.scaleMatrix, this.scaleMatrix, scale);
+        this.computeBoundingBox();
     }
 
     /** 
@@ -164,6 +172,68 @@ abstract class Shape {
         vec3.scale(shadingColor, this.color, this.ambient + this.diffuse * diffuseTerm + this.specular * specularTerm);
         return shadingColor;
     }
+
+    intersectBoundingBox(ray: Ray): boolean {
+
+        if (!this.boundingBoxExists) {
+            return true;
+        }
+        // Intersect with the x planes of the bounding box
+        let tmin = (this.boundingBoxOrigin[0] - ray.origin[0]) / ray.direction[0];
+        let tmax = (this.boundingBoxOrigin[0] + this.boundingBoxSize[0] - ray.origin[0]) / ray.direction[0];
+
+        if (tmin > tmax) {
+            [tmin, tmax] = [tmax, tmin];
+        }
+
+        // now do the same for y then see if it is an obvious miss
+        let tymin = (this.boundingBoxOrigin[1] - ray.origin[1]) / ray.direction[1];
+        let tymax = (this.boundingBoxOrigin[1] + this.boundingBoxSize[1] - ray.origin[1]) / ray.direction[1];
+
+        if (tymin > tymax) {
+            [tymin, tymax] = [tymax, tymin]
+        }
+
+        // This means that the ray went 
+        if ((tmin > tymax) || (tymin > tmax)) {
+            return false;
+        }
+
+        if (tymin > tmin) {
+            tmin = tymin;
+        }
+
+        if (tymax < tmax) {
+            tmax = tymax;
+        }
+
+        let tzmin = (this.boundingBoxOrigin[2] - ray.origin[2]) / ray.direction[2];
+        let tzmax = (this.boundingBoxOrigin[2] + this.boundingBoxSize[2] - ray.origin[2]) / ray.direction[2];
+
+        if (tzmin > tzmax) {
+            let temp = tzmin;
+            tzmin = tzmax;
+            tzmax = temp;
+        }
+
+        if ((tmin > tzmax) || (tzmin > tmax)) {
+            return false;
+        }
+
+        if (tzmin > tmin) {
+            tmin = tzmin;
+        }
+
+        if (tzmax < tmax) {
+            tmax = tzmax;
+        }
+
+        return true;
+    }
+
+    abstract computeBoundingBox(): void;
+
+
 
     abstract intersect(ray: Ray): Intersection;
 

@@ -10,10 +10,12 @@ import CameraControlComponent from './CameraControlComponent';
 import Camera from './Camera';
 
 
-const maxPixelSize = 2;
-const frame = new FrameBuffer(640, 320);
+
+const frameBufferSize = [1280, 720];
+
+
 const borderColor = [10, 10, 10];
-const renderer = new RayTracer(frame);
+
 let camera = new Camera();
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,7 +23,10 @@ function App() {
 
   const [selectedModel, setSelectedModel] = useState("");
   const [borderColor, setBorderColor] = useState([10, 10, 10]);
+  const [maxPixelSize, setMaxPixelSize] = useState(4);
   const [pixelSize, setPixelSize] = useState(maxPixelSize);
+  const [frameBuffer, setFrameBuffer] = useState(new FrameBuffer(frameBufferSize[0] / maxPixelSize, frameBufferSize[1] / maxPixelSize));
+  const [renderer, setRenderer] = useState(new RayTracer(frameBuffer));
 
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
@@ -124,6 +129,27 @@ function App() {
     setPixelSize(size);
   }
 
+  function makePixelResolution(size: number) {
+  }
+
+
+  // put 4 buttons up for selecting the image resolution
+  // 1280 x 720 (720p)
+  //640 x 480 (VGA)
+  //320 x 240 (QVGA)
+  // 160 x 120 (QQVGA)
+  function ResolutionComponent() {
+    return (
+      <div>
+        <button onClick={() => makePixelResolution(1)}>1280 x 720</button>
+        <button onClick={() => makePixelResolution(2)}>640 x 480</button>
+        <button onClick={() => makePixelResolution(4)}>320 x 240</button>
+
+        <button onClick={() => makePixelResolution(8)}>160 x 120</button>
+      </div>
+    );
+  }
+
   // define a slider that goes from 1 to maxPixelSize
   function PixelSizeComponent() {
     return (
@@ -154,7 +180,7 @@ function App() {
    * 
    */
   function bufferImage() {
-    const data = frame.getImageData(pixelSize);
+    const data = frameBuffer.getImageData(pixelSize);
     // now construct an image from the data
     const ctx = canvasRef.current?.getContext('2d');
     // clear the canvas
@@ -164,19 +190,19 @@ function App() {
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, canvasRef.current?.width || 0, canvasRef.current?.height || 0); // fill the entire canvas with black
 
-      const imageData = new ImageData(data, frame.width * pixelSize, frame.height * pixelSize);
+      const imageData = new ImageData(data, frameBuffer.width * pixelSize, frameBuffer.height * pixelSize);
 
-      const image_width = frame.width * pixelSize;
-      const image_height = frame.height * pixelSize;
+      const image_width = frameBuffer.width * pixelSize;
+      const image_height = frameBuffer.height * pixelSize;
       // center the image on the canvas
 
-      const x_offset = (frame.width * maxPixelSize - image_width) / 2;
-      const y_offset = (frame.height * maxPixelSize - image_height) / 2;
+      const x_offset = (frameBuffer.width * maxPixelSize - image_width) / 2;
+      const y_offset = (frameBuffer.height * maxPixelSize - image_height) / 2;
       ctx.putImageData(imageData, x_offset, y_offset);
 
     }
     return (
-      <canvas ref={canvasRef} width={frame.width * maxPixelSize} height={frame.height * maxPixelSize} />
+      <canvas ref={canvasRef} width={frameBuffer.width * maxPixelSize} height={frameBuffer.height * maxPixelSize} />
     );
   }
 
@@ -189,10 +215,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         {bufferImage()}
+        <ResolutionComponent />
         <ModelSelectionComponent />
         <PixelSizeComponent />
-
-        <CameraControlComponent camera={camera} updateCamera={updateCamera} />
 
       </header>
     </div>

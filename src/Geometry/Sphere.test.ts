@@ -37,10 +37,25 @@ describe('Sphere', () => {
         const unitSphere = new Sphere(1, vec3.fromValues(0, 0, 0));
         const intersection = unitSphere.intersect(ray);
         const expectedPosition = vec3.fromValues(0, 1, 0);
+
+        expect(intersection.position[0]).toEqual(expectedPosition[0]);
+        expect(intersection.position[1]).toEqual(expectedPosition[1]);
+        expect(Math.abs(intersection.position[2])).toBeLessThan(0.0001); // allow for numerical error
+
+
         expect(intersection.hitDistance).toBeLessThan(Number.MAX_VALUE);
-        expect(intersection.position).toEqual(expectedPosition);
+
         expect(intersection.reflectedRay.direction).toEqual(vec3.fromValues(0, 1, -1));
         expect(intersection.hitShape).toEqual(unitSphere);
+    });
+
+    it('should compute the bounding box', () => {
+
+
+        sphere.computeBoundingBox();
+
+        expect(sphere.boundingBoxOrigin).toEqual(vec3.fromValues(-5, -5, -5));
+        expect(sphere.boundingBoxSize).toEqual(vec3.fromValues(10, 10, 10));
     });
 });
 

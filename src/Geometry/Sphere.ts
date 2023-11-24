@@ -32,6 +32,34 @@ export class Sphere extends Shape {
         super();
         this.radius = radius;
         this.center = center;
+        this.computeBoundingBox();
+    }
+
+    /** construct a bounding box based on the current transform
+     * 
+     */
+    computeBoundingBox() {
+        // first we need to get the bounding box in object space
+        let min = vec3.fromValues(-this.radius, -this.radius, -this.radius);
+        let max = vec3.fromValues(this.radius, this.radius, this.radius);
+
+        // now we need to transform the min and max by the model matrix
+        let minWorld = this.transformPointToWorldSpace(min);
+        let maxWorld = this.transformPointToWorldSpace(max);
+
+        // now we need to find the min and max of the world space bounding box
+        let minWorldX = Math.min(minWorld[0], maxWorld[0]);
+        let minWorldY = Math.min(minWorld[1], maxWorld[1]);
+        let minWorldZ = Math.min(minWorld[2], maxWorld[2]);
+
+        let maxWorldX = Math.max(minWorld[0], maxWorld[0]);
+        let maxWorldY = Math.max(minWorld[1], maxWorld[1]);
+        let maxWorldZ = Math.max(minWorld[2], maxWorld[2]);
+
+        // now we need to set the bounding box origin and size
+        this.boundingBoxOrigin = vec3.fromValues(minWorldX, minWorldY, minWorldZ);
+        this.boundingBoxSize = vec3.fromValues(maxWorldX - minWorldX, maxWorldY - minWorldY, maxWorldZ - minWorldZ);
+        this.boundingBoxExists = true;
     }
 
     /**
@@ -40,6 +68,14 @@ export class Sphere extends Shape {
      * returns null if no intersection
      */
     intersect(ray: Ray): Intersection {
+
+        if (this.intersectBoundingBox(ray) === false) {
+            let noIntersection = Intersection.create();
+            noIntersection.hitDistance = Number.MAX_VALUE;
+            return noIntersection;
+        }
+
+
         // first get the ray in object space
         let rayOriginObjectSpace = this.getRayInObjectSpace(ray);
 
