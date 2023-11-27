@@ -65,7 +65,7 @@ export class Sphere extends Shape {
     /**
      * @function intersect
      * @desc returns intersection point of ray and sphere
-     * returns null if no intersection
+     * 
      */
     intersect(ray: Ray): Intersection {
 

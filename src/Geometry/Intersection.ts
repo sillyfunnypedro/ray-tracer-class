@@ -42,6 +42,11 @@ class Intersection {
     hitShape: Shape | null = null;
 
     /**
+     * uv coordinates
+     */
+    uv: vec3 = vec3.create();
+
+    /**
      * 
      * generation of the ray that hit us
      */

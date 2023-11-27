@@ -8,6 +8,7 @@ function Main() {
 
     const [pixelSize, setPixelSize] = useState(4)
     const [sceneName, setSelectedModel] = useState('sphere');
+    const [rayDepth, setRayDepth] = useState(1);
 
     function makePixelResolution(size: number) {
         setPixelSize(size);
@@ -20,6 +21,10 @@ function Main() {
         const button = event.currentTarget;
         const scene = button.textContent;
         if (scene) {
+            let currentScene = Scenes.getScene(scene);
+            if (currentScene) {
+                setRayDepth(currentScene.rayDepth);
+            }
             setSelectedModel(scene);
         }
     }
@@ -40,6 +45,14 @@ function Main() {
                 })}
             </div>
         );
+    }
+
+    function rayDepthCallback(depth: number): void {
+        let currentScene = Scenes.getScene(sceneName);
+        if (currentScene) {
+            currentScene.rayDepth = depth;
+        }
+        setRayDepth(depth);
     }
 
 
@@ -74,16 +87,56 @@ function Main() {
             </div>
         );
     }
+
+    function RayDepthComponent() {
+        return (
+            <div>
+                <button
+                    onClick={() => rayDepthCallback(1)}
+                    style={{
+                        backgroundColor: rayDepth === 1 ? 'green' : 'gray',
+                    }}>1</button>
+                <button onClick={() => rayDepthCallback(2)}
+                    style={{
+                        backgroundColor: rayDepth === 2 ? 'green' : 'gray',
+                    }}>2</button>
+                <button onClick={() => rayDepthCallback(3)} style={{
+                    backgroundColor: rayDepth === 3 ? 'green' : 'gray',
+                }}>3</button>
+
+                <button onClick={() => rayDepthCallback(4)} style={{
+                    backgroundColor: rayDepth === 4 ? 'green' : 'gray',
+                }}>4</button>
+                <button onClick={() => rayDepthCallback(5)} style={{
+                    backgroundColor: rayDepth === 5 ? 'green' : 'gray',
+                }}>5</button>
+                <button onClick={() => rayDepthCallback(6)} style={{
+                    backgroundColor: rayDepth === 6 ? 'green' : 'gray',
+                }}>6</button>
+                <button onClick={() => rayDepthCallback(7)} style={{
+                    backgroundColor: rayDepth === 7 ? 'green' : 'gray',
+                }}>7</button>
+                <button onClick={() => rayDepthCallback(8)} style={{
+                    backgroundColor: rayDepth === 8 ? 'green' : 'gray',
+                }}>8</button>
+                <button onClick={() => rayDepthCallback(9)} style={{
+                    backgroundColor: rayDepth === 9 ? 'green' : 'gray',
+                }}>9</button>
+            </div>
+        );
+    }
+
     return (
         <div className="App">
             <header className="App-header">
-
+                <RayDepthComponent />
                 <ResolutionComponent />
                 <SceneSelectionComponent />
-                <App key={pixelSize}
+                <App key={pixelSize * rayDepth}
                     pixelSize={pixelSize}
                     setPixelSize={setPixelSize}
-                    sceneName={sceneName} />
+                    sceneName={sceneName}
+                    rayDepth={rayDepth} />
             </header>
         </div>
     );

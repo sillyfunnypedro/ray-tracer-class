@@ -12,6 +12,7 @@ import Shape from './Shape';
 import Light from './Light';
 import Ray from './Ray';
 import Intersection from './Intersection';
+import Camera from '../Camera';
 import Color from './../Color';
 
 
@@ -48,6 +49,12 @@ class Scene {
      * Epsilon value for ray intersection to avoid self intersection
      */
     epsilon: number = 0.0001;
+
+    /**
+     * 
+     * scene camera
+     */
+    camera: Camera = new Camera();
 
     computeShading(intersection: Intersection): vec3 {
         let color = vec3.create()
@@ -125,20 +132,20 @@ class Scene {
             if (shape === originShape) {
                 continue;
             }
-            let nextIntersection = shape.intersect(ray,);
+            let nextIntersection = shape.intersect(ray);
             if (nextIntersection.hitDistance !== Number.MAX_VALUE && nextIntersection.hitDistance < distance) {
                 if (nextIntersection.hitDistance > 0) {
                     distance = nextIntersection.hitDistance;
                     currentIntersection = nextIntersection;
                 }
-
-                shape.intersect(ray);
-
             }
         }
         if (!currentIntersection) {
-            return this.backgroundColor;
+            let copyOfBackgroundColor = vec3.create();
+            vec3.copy(copyOfBackgroundColor, this.backgroundColor);
+            return copyOfBackgroundColor;
         }
+
         let color = this.computeShading(currentIntersection);
 
         return color;

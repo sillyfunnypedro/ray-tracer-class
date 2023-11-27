@@ -96,7 +96,7 @@ class RayTracer {
     }
 
 
-    public render(camera: Camera, selectedScene: string): void {
+    public async render(selectedScene: string,): Promise<void> {
 
         if (selectedScene === "") {
             return;
@@ -106,34 +106,12 @@ class RayTracer {
         if (scene === null || scene === undefined) {
             throw new Error("scene is null or undefined");
         }
-        const eyePosition = camera.eyePosition;
 
-        const lookAt = camera.lookAt;
 
-        const nearPlane = camera.nearPlane;
+        const eyePosition = scene.camera.eyePosition;
 
-        const width = camera.viewPortWidth;
-        const height = camera.viewPortHeight;
 
-        const pixelWidth = width / this._frameBuffer.width;
-        const pixelHeight = height / this._frameBuffer.height;
 
-        // we need to calculate the delta vector for the x and y axis
-        const eyeVector = vec3.subtract(vec3.create(), lookAt, eyePosition);
-        vec3.normalize(eyeVector, eyeVector);
-
-        const upVector = camera.upVector;
-
-        const uVector = vec3.cross(vec3.create(), eyeVector, upVector);
-        vec3.normalize(uVector, uVector);
-
-        const vVector = vec3.cross(vec3.create(), uVector, eyeVector);
-        vec3.normalize(vVector, vVector);
-
-        const centerPoint = vec3.add(vec3.create(), eyePosition, vec3.scale(vec3.create(), eyeVector, nearPlane));
-
-        const uDelta = vec3.scale(vec3.create(), uVector, pixelWidth);
-        const vDelta = vec3.scale(vec3.create(), vVector, pixelHeight);
 
         for (let i = 0; i < this._frameBuffer.height; i++) {
             for (let j = 0; j < this._frameBuffer.width; j++) {
@@ -141,7 +119,7 @@ class RayTracer {
 
 
 
-                const screenPosition = this.getScreenPosition2(j, this._frameBuffer.height - i, camera);
+                const screenPosition = this.getScreenPosition2(j, this._frameBuffer.height - i, scene.camera);
                 let rayDirection = vec3.subtract(vec3.create(), screenPosition, eyePosition);
 
                 // make the ray direction always point to the center of the screen
@@ -159,12 +137,15 @@ class RayTracer {
                 // this is for debugging and finding a single pixel.
 
                 // uncomment this to find a single pixel and then put a break point on the next call to intersect.
-                if (i === this._frameBuffer.height / 2 && j === -3 + this._frameBuffer.width / 2) {
-                    // console.log("center");
-                    // this._frameBuffer.pixels[i][j] = Color.createFromVec3(vec3.fromValues(1, 0, 0));
-                    // let color = scene.intersect(ray);
-                    // continue;
-                }
+                // if (i<=1 &&
+                //     j=== -60 + this._frameBuffer.width / 2
+                //     ){
+                //     //i === this._frameBuffer.height / 2 && j === -3 + this._frameBuffer.width / 2) {
+                //     console.log("center");
+                //     this._frameBuffer.pixels[i][j] = Color.createFromVec3(vec3.fromValues(1, 0, 0));
+                //     let color = scene.intersect(ray);
+                //     continue;
+                // }
                 this._frameBuffer.pixels[i][j] = Color.createFromVec3(color);
             }
         }

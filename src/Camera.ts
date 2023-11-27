@@ -31,11 +31,11 @@ class Camera {
     constructor() {
         this.viewMatrix = mat4.create();
         this._projectionMatrix = mat4.create();
-        this.eyePosition = vec3.fromValues(0, 5, 10)
-        this.lookAt = vec3.fromValues(0, 0, 0);
+        this.eyePosition = vec3.fromValues(30, 15, 30)
+        this.lookAt = vec3.fromValues(-10, 0, -10);
         this.upVector = vec3.fromValues(0, 1, 0);
         this.aspectRatio = 1;
-        this.fieldOfView = 30;
+        this.fieldOfView = 45;
         this.nearPlane = 4;
         this.farPlane = 100;
         this.viewPortWidth = 1;
