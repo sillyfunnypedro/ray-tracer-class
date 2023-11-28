@@ -131,7 +131,7 @@ class RayTracer {
                 if (intersect === null || intersect === undefined) {
                     throw new Error("intersect is null or undefined");
                 }
-                let color = scene.intersect(ray, null, useBoundingBox);
+                let intersection = scene.intersect(ray, null, useBoundingBox);
                 // this is for debugging and finding a single pixel.
 
                 // uncomment this to find a single pixel and then put a break point on the next call to intersect.
@@ -144,6 +144,7 @@ class RayTracer {
                 //     let color = scene.intersect(ray);
                 //     continue;
                 // }
+                let color = scene.computeShading(intersection);
                 this._frameBuffer.pixels[i][j] = Color.createFromVec3(color);
             }
             let progress = Math.floor(i / this._frameBuffer.height * 100);

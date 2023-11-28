@@ -34,7 +34,7 @@ class Intersection {
     /**
      * Hit distance
      */
-    hitDistance: number = 0;
+    hitDistance: number = Number.MAX_VALUE;
 
     /**
      * Hit Shape

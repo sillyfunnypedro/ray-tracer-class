@@ -62,23 +62,44 @@ class Scene {
      */
     useBoundingBox: boolean = true;
 
+    /**
+     * 
+     * 
+     */
+    computeShadows: boolean = true;
+
     computeShading(intersection: Intersection): vec3 {
         let color = vec3.create()
+
+        if (intersection.hitShape === null) {
+            let backgroundColor = vec3.copy(vec3.create(), this.backgroundColor);
+            return backgroundColor;
+        }
         for (let light of this.lights) {
+
+            let difuseColor = vec3.create();
+
             let lightColor = vec3.create();
             vec3.copy(lightColor, light.color);
             vec3.scale(lightColor, lightColor, light.intensity);
-
-            // ambient color
-            let ambientColor = vec3.create();
-            vec3.copy(ambientColor, intersection.hitShape!.color);
-            vec3.scale(ambientColor, ambientColor, intersection.hitShape!.ambient);
-
 
             let lightDirection = vec3.create();
             vec3.copy(lightDirection, light.position);
             vec3.subtract(lightDirection, lightDirection, intersection.position);
             vec3.normalize(lightDirection, lightDirection);
+
+            if (this.computeShadows) {
+                let shadowRay = Ray.create();
+                let distanceToLight = vec3.distance(light.position, intersection.position);
+
+                shadowRay.origin = intersection.position;
+                shadowRay.direction = lightDirection;
+                shadowRay.generation = intersection.generation + 1;
+                let shadowIntersection = this.intersect(shadowRay, intersection.hitShape!, this.useBoundingBox);
+                if (shadowIntersection.hitDistance < distanceToLight) {
+                    continue;
+                }
+            }
 
             let normal = vec3.create();
             vec3.copy(normal, intersection.normal);
@@ -90,6 +111,12 @@ class Scene {
             vec3.multiply(diffuseColor, lightColor, intersection.hitShape!.color);
             vec3.scale(diffuseColor, diffuseColor, diffuseIntensity);
             vec3.scale(diffuseColor, diffuseColor, intersection.hitShape!.diffuse);
+
+
+            // ambient color
+            let ambientColor = vec3.create();
+            vec3.copy(ambientColor, intersection.hitShape!.color);
+            vec3.scale(ambientColor, ambientColor, intersection.hitShape!.ambient);
 
             // calculate the reflected ray 
 
@@ -105,7 +132,10 @@ class Scene {
             if (intersection.generation < this.rayDepth && intersection.hitShape!.reflectivity > 0) {
 
                 reflectedRay.generation = intersection.generation + 1;
-                reflectedColor = this.intersect(reflectedRay, intersection.hitShape!, this.useBoundingBox);
+                let reflectedObject = this.intersect(reflectedRay, intersection.hitShape!, this.useBoundingBox);
+                if (reflectedObject.hitDistance !== Number.MAX_VALUE) {
+                    reflectedColor = this.computeShading(reflectedObject);
+                }
                 vec3.scale(reflectedColor, reflectedColor, intersection.hitShape!.reflectivity);
 
             }
@@ -130,9 +160,9 @@ class Scene {
     /**
      * intersect
      */
-    intersect(ray: Ray, originShape: Shape | null = null, useBoundingBox: boolean): vec3 {
+    intersect(ray: Ray, originShape: Shape | null = null, useBoundingBox: boolean): Intersection {
         let distance = Infinity;
-        let currentIntersection: Intersection | null = null;
+        let currentIntersection: Intersection = Intersection.create();
 
         for (let shape of this.shapes) {
             if (shape === originShape) {
@@ -146,18 +176,10 @@ class Scene {
                 }
             }
         }
-        if (!currentIntersection) {
-            let copyOfBackgroundColor = vec3.create();
-            vec3.copy(copyOfBackgroundColor, this.backgroundColor);
-            return copyOfBackgroundColor;
-        }
-
-        let color = this.computeShading(currentIntersection);
-
-        return color;
-
-
+        return currentIntersection;
     }
+
+
 }
 
 export default Scene;
