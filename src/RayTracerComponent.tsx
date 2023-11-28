@@ -5,19 +5,22 @@ import FrameBuffer from './FrameBuffer'
 
 import Scenes from './Scenes'
 import RayTracer from './RayTracer'
+import { buffer } from 'stream/consumers';
+import StatsContainer from './StatsContainer';
 
 interface AppProps {
   pixelSize: number;
   setPixelSize: (size: number) => void;
   sceneName: string;
   rayDepth: number;
+  updateStats: () => void;
 }
 
 const frameBufferSize = [1280, 720];
 
 
 
-function App({ pixelSize, setPixelSize, sceneName }: AppProps) {
+function RayTracerComponent({ pixelSize, setPixelSize, sceneName, updateStats }: AppProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
@@ -26,6 +29,8 @@ function App({ pixelSize, setPixelSize, sceneName }: AppProps) {
   const [renderer, setRenderer] = useState(new RayTracer(frameBuffer));
   const [renderingInProgress, setRenderingInProgress] = useState(false);
   const [frameNumber, setFrameNumber] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [imageVersion, setImageVersion] = useState(0);
 
   let imageRendered = false;  // this gets called twice, so we need to make sure we only render once.
 
@@ -51,12 +56,34 @@ function App({ pixelSize, setPixelSize, sceneName }: AppProps) {
     nextFrame();
     setFrameNumber(frameNumber + 1);
   }
+
+  function updateImage() {
+    bufferImage();
+    setImageVersion(imageVersion + 1);
+  }
+
+
   function nextFrame() {
     if (imageRendered) {
       return;
     }
-    renderer.render(sceneName);
     imageRendered = true;
+    console.log('nextFrame');
+    bufferImage();
+    //const intervalId = setInterval(bufferImage, 1000 / 30); // Approximately every 30th of a second
+
+    renderer.render(sceneName, (progress) => {
+      setProgress(progress);
+      updateImage();
+    }).then((elapsedTime) => {
+      console.log('render complete in ' + elapsedTime + ' seconds');
+      imageRendered = true;
+
+      let statsContainer = StatsContainer.getInstance();
+      statsContainer.elapsedTime = elapsedTime;
+      updateStats();
+      //clearInterval(intervalId);
+    });
   }
   //nextFrame();
   /** 
@@ -64,7 +91,7 @@ function App({ pixelSize, setPixelSize, sceneName }: AppProps) {
    * 
    */
   function bufferImage() {
-
+    console.log('bufferImage')
     const data = frameBuffer.getImageData(pixelSize);
     // now construct an image from the data
     const ctx = canvasRef.current?.getContext('2d');
@@ -85,9 +112,7 @@ function App({ pixelSize, setPixelSize, sceneName }: AppProps) {
       ctx.putImageData(imageData, 0, 0);
 
     }
-    return (
-      <canvas ref={canvasRef} width={frameBuffer.width * pixelSize} height={frameBuffer.height * pixelSize} />
-    );
+
   }
 
 
@@ -95,10 +120,10 @@ function App({ pixelSize, setPixelSize, sceneName }: AppProps) {
   // call the ray tracer to render the frame
 
   return (
-    <div className="App">
-      {bufferImage()}
+    <div >
+      <canvas ref={canvasRef} width={frameBuffer.width * pixelSize} height={frameBuffer.height * pixelSize} />
     </div>
   );
 }
 
-export default App;
+export default RayTracerComponent;

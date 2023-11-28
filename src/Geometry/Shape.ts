@@ -235,7 +235,7 @@ abstract class Shape {
 
 
 
-    abstract intersect(ray: Ray): Intersection;
+    abstract intersect(ray: Ray, useBoundingBox: boolean): Intersection;
 
 }
 

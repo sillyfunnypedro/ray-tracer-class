@@ -96,10 +96,12 @@ class RayTracer {
     }
 
 
-    public async render(selectedScene: string,): Promise<void> {
+    public async render(selectedScene: string, callback: (arg0: number) => void): Promise<number> {
+
+        let startTime = Date.now();
 
         if (selectedScene === "") {
-            return;
+            return (0);
         }
         const scene = Scenes.getScene(selectedScene)
 
@@ -107,17 +109,13 @@ class RayTracer {
             throw new Error("scene is null or undefined");
         }
 
+        let useBoundingBox = scene.useBoundingBox;
+
 
         const eyePosition = scene.camera.eyePosition;
 
-
-
-
         for (let i = 0; i < this._frameBuffer.height; i++) {
             for (let j = 0; j < this._frameBuffer.width; j++) {
-
-
-
 
                 const screenPosition = this.getScreenPosition2(j, this._frameBuffer.height - i, scene.camera);
                 let rayDirection = vec3.subtract(vec3.create(), screenPosition, eyePosition);
@@ -133,7 +131,7 @@ class RayTracer {
                 if (intersect === null || intersect === undefined) {
                     throw new Error("intersect is null or undefined");
                 }
-                let color = scene.intersect(ray, null);
+                let color = scene.intersect(ray, null, useBoundingBox);
                 // this is for debugging and finding a single pixel.
 
                 // uncomment this to find a single pixel and then put a break point on the next call to intersect.
@@ -148,7 +146,12 @@ class RayTracer {
                 // }
                 this._frameBuffer.pixels[i][j] = Color.createFromVec3(color);
             }
+            let progress = Math.floor(i / this._frameBuffer.height * 100);
+            callback(progress);
         }
+        let endTime = Date.now();
+        let elapsedTime = endTime - startTime;
+        return elapsedTime;
     }
 
 

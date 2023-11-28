@@ -56,6 +56,12 @@ class Scene {
      */
     camera: Camera = new Camera();
 
+    /**
+     * 
+     * useBoundingBox 
+     */
+    useBoundingBox: boolean = true;
+
     computeShading(intersection: Intersection): vec3 {
         let color = vec3.create()
         for (let light of this.lights) {
@@ -99,7 +105,7 @@ class Scene {
             if (intersection.generation < this.rayDepth && intersection.hitShape!.reflectivity > 0) {
 
                 reflectedRay.generation = intersection.generation + 1;
-                reflectedColor = this.intersect(reflectedRay, intersection.hitShape!);
+                reflectedColor = this.intersect(reflectedRay, intersection.hitShape!, this.useBoundingBox);
                 vec3.scale(reflectedColor, reflectedColor, intersection.hitShape!.reflectivity);
 
             }
@@ -124,7 +130,7 @@ class Scene {
     /**
      * intersect
      */
-    intersect(ray: Ray, originShape: Shape | null = null): vec3 {
+    intersect(ray: Ray, originShape: Shape | null = null, useBoundingBox: boolean): vec3 {
         let distance = Infinity;
         let currentIntersection: Intersection | null = null;
 
@@ -132,7 +138,7 @@ class Scene {
             if (shape === originShape) {
                 continue;
             }
-            let nextIntersection = shape.intersect(ray);
+            let nextIntersection = shape.intersect(ray, useBoundingBox);
             if (nextIntersection.hitDistance !== Number.MAX_VALUE && nextIntersection.hitDistance < distance) {
                 if (nextIntersection.hitDistance > 0) {
                     distance = nextIntersection.hitDistance;

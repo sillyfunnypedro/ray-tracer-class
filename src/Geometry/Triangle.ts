@@ -110,9 +110,9 @@ class Triangle extends Shape {
      * @desc returns intersection point of ray and triangle
      */
 
-    intersect(ray: Ray): Intersection {
+    intersect(ray: Ray, useBoundingBox: boolean): Intersection {
 
-        if (this.intersectBoundingBox(ray) === false) {
+        if (useBoundingBox && this.intersectBoundingBox(ray) === false) {
             let noIntersection = Intersection.create();
             noIntersection.hitDistance = Number.MAX_VALUE;
             return noIntersection;

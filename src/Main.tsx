@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import App from './App';
+import RayTracerComponent from './RayTracerComponent';
 import Scenes from './Scenes'
+import StatsContainer from './StatsContainer';
 
-
+const statsContainer = StatsContainer.getInstance();
 function Main() {
 
     const [pixelSize, setPixelSize] = useState(4)
     const [sceneName, setSelectedModel] = useState('sphere');
     const [rayDepth, setRayDepth] = useState(1);
+    const [useBoundingBox, setUseBoundingBox] = useState(true);
+    const [elapsedTime, setElapsedTime] = useState(0);
 
     function makePixelResolution(size: number) {
         setPixelSize(size);
@@ -28,6 +31,20 @@ function Main() {
             setSelectedModel(scene);
         }
     }
+
+    function updateUseBoundingBox() {
+        let currentScene = Scenes.getScene(sceneName);
+        if (currentScene) {
+            currentScene.useBoundingBox = !currentScene.useBoundingBox;
+            setUseBoundingBox(currentScene.useBoundingBox);
+            setElapsedTime(statsContainer.elapsedTime);
+
+        }
+    }
+    function updateStats() {
+        setElapsedTime(statsContainer.elapsedTime);
+    }
+
     // a Component that calls models.getModels and produces buttons for selecting models
     function SceneSelectionComponent() {
         const modelNames = Scenes.getScenes();
@@ -45,6 +62,21 @@ function Main() {
                 })}
             </div>
         );
+    }
+
+    function RenderingOptionsComponent() {
+        let currentScene = Scenes.getScene(sceneName);
+        let elapsedTimeText = `Elapsed Time: ${(elapsedTime / 1000.0).toFixed(4)} seconds`
+        if (currentScene) {
+            return (
+                <div style={{ fontSize: '20px' }}>
+                    {elapsedTimeText} <br />
+                    <input type="checkbox" onChange={updateUseBoundingBox} checked={currentScene.useBoundingBox} /> Use Bounding Box
+                </div>
+            );
+
+        }
+        return (<div></div>);
     }
 
     function rayDepthCallback(depth: number): void {
@@ -129,14 +161,16 @@ function Main() {
     return (
         <div className="App">
             <header className="App-header">
+
+                <RenderingOptionsComponent />
                 <RayDepthComponent />
                 <ResolutionComponent />
                 <SceneSelectionComponent />
-                <App key={pixelSize * rayDepth}
+                <RayTracerComponent key={pixelSize * rayDepth * (useBoundingBox ? 1 : 0)}
                     pixelSize={pixelSize}
                     setPixelSize={setPixelSize}
                     sceneName={sceneName}
-                    rayDepth={rayDepth} />
+                    rayDepth={rayDepth} updateStats={updateStats} />
             </header>
         </div>
     );

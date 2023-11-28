@@ -73,7 +73,7 @@ function createTriangle() {
     let scene = new Scene();
     scene.backgroundColor = vec3.fromValues(0.5, 0.5, 0.5);
 
-    let triangle = new Triangle(vec3.fromValues(-5, 0, -5), vec3.fromValues(0, 0, 5), vec3.fromValues(5, 0, -5),);
+    let triangle = new Triangle(vec3.fromValues(-10, 0, -10), vec3.fromValues(0, 0, 10), vec3.fromValues(10, 0, -10),);
     triangle.color = vec3.fromValues(1, 1, 1);
     triangle.ambient = 0.2;
     triangle.diffuse = 0.4;
