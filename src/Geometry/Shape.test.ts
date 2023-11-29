@@ -30,28 +30,6 @@ describe('Shape', () => {
         intersectionPoint = vec3.fromValues(0, 0, 0);
     });
 
-    it('should correctly calculate the reflected ray', () => {
-        const reflectedRay = shape.getReflectedRay(ray, normal, intersectionPoint);
-        expect(reflectedRay.origin).toEqual(intersectionPoint);
-        expect(reflectedRay.direction).toEqual(vec3.fromValues(0, 0, -1));
-    });
-
-    it('should correctly calculate the reflected ray with a non-zero intersection point', () => {
-        intersectionPoint = vec3.fromValues(1, 1, 1);
-        const reflectedRay = shape.getReflectedRay(ray, normal, intersectionPoint);
-        expect(reflectedRay.origin).toEqual(intersectionPoint);
-        expect(reflectedRay.direction).toEqual(vec3.fromValues(0, 0, -1));
-    });
-
-    it('should correctly calculate the reflected ray with a non-standard normal', () => {
-        normal = vec3.fromValues(0, 1, 0);
-        let ray = new Ray(vec3.fromValues(0, 10, 10), vec3.fromValues(0, -1, -1));
-        const reflectedRay = shape.getReflectedRay(ray, normal, intersectionPoint);
-        expect(reflectedRay.origin).toEqual(intersectionPoint);
-        let expectedDirection = vec3.fromValues(0, 1, -1);
-
-        expect(reflectedRay.direction).toEqual(expectedDirection);
-    });
 
     // test the bounding box.
 

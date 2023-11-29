@@ -113,7 +113,9 @@ class RayTracer {
 
 
         const eyePosition = scene.camera.eyePosition;
-
+        console.log("eyePosition: " + eyePosition);
+        console.log("lookAt: " + scene.camera.lookAt);
+        console.log(`resolution: ${this._frameBuffer.width} x ${this._frameBuffer.height}`)
         for (let i = 0; i < this._frameBuffer.height; i++) {
             for (let j = 0; j < this._frameBuffer.width; j++) {
 
@@ -135,15 +137,13 @@ class RayTracer {
                 // this is for debugging and finding a single pixel.
 
                 // uncomment this to find a single pixel and then put a break point on the next call to intersect.
-                // if (i<=1 &&
-                //     j=== -60 + this._frameBuffer.width / 2
-                //     ){
-                //     //i === this._frameBuffer.height / 2 && j === -3 + this._frameBuffer.width / 2) {
-                //     console.log("center");
-                //     this._frameBuffer.pixels[i][j] = Color.createFromVec3(vec3.fromValues(1, 0, 0));
-                //     let color = scene.intersect(ray);
-                //     continue;
-                // }
+                if (
+                    i === -20 +this._frameBuffer.height / 2 && j === this._frameBuffer.width / 2) {
+                    console.log("center");
+                    this._frameBuffer.pixels[i][j] = Color.createFromVec3(vec3.fromValues(0, 1, 0));
+                    let color = scene.intersect(ray, null, useBoundingBox);
+                    continue;
+                }
                 let color = scene.computeShading(intersection);
                 this._frameBuffer.pixels[i][j] = Color.createFromVec3(color);
             }

@@ -10,8 +10,8 @@ describe('Sphere', () => {
 
     beforeEach(() => {
         center = vec3.fromValues(0, 0, 0);
-        radius = 5;
-        sphere = new Sphere(radius, center);
+        radius = 1;
+        sphere = new Sphere();
     });
 
     it('should correctly initialize with a center and radius', () => {
@@ -34,7 +34,7 @@ describe('Sphere', () => {
 
     it('should return intersection when the ray his the top of the sphere', () => {
         const ray = new Ray(vec3.fromValues(0, 13, 12), vec3.fromValues(0, -1, -1));
-        const unitSphere = new Sphere(1, vec3.fromValues(0, 0, 0));
+        const unitSphere = new Sphere();
         const intersection = unitSphere.intersect(ray, true);
         const expectedPosition = vec3.fromValues(0, 1, 0);
 

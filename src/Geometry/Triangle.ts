@@ -85,6 +85,16 @@ class Triangle extends Shape {
             if (v[1] > max[1]) max[1] = v[1];
             if (v[2] > max[2]) max[2] = v[2];
         }
+        // add substract epsilon to min and add epsilon to max
+        min[0] -= 0.0001;
+        min[1] -= 0.0001;
+        min[2] -= 0.0001;
+
+        max[0] += 0.0001;
+        max[1] += 0.0001;
+        max[2] += 0.0001;
+
+
         this.boundingBoxOrigin = min;
         this.boundingBoxSize = vec3.subtract(vec3.create(), max, min);
         this.boundingBoxExists = true;

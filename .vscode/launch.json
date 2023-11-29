@@ -34,6 +34,13 @@
         },
         {
             "type": "node-terminal",
+            "name": "Jest Cube",
+            "request": "launch",
+            "command": "npx jest Cube",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
             "name": "Jest Shape",
             "request": "launch",
             "command": "npx jest Shape",

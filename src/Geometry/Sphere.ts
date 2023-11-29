@@ -16,22 +16,20 @@ export class Sphere extends Shape {
     /**
      * Sphere radius
      */
-    radius: number;
+    radius: number = 1;
 
     /**
      * Sphere center
      */
-    center: vec3;
+    center: vec3 = vec3.fromValues(0, 0, 0);
 
     /**
      * Sphere constructor
      * @param {number} radius - Sphere radius
      * @param {vec3} center - Sphere center
      */
-    constructor(radius: number, center: vec3) {
+    constructor() {
         super();
-        this.radius = radius;
-        this.center = center;
         this.computeBoundingBox();
     }
 
@@ -116,12 +114,13 @@ export class Sphere extends Shape {
 
 
         let intersection = Intersection.create();
+
         intersection.position = worldSpacePoint;
         intersection.normal = normal;
         intersection.hitDistance = resultingT;
         intersection.hitShape = this;
         intersection.reflectedRay = reflectedRay;
-        intersection.generation = ray.generation + 1;
+
 
 
         return intersection;

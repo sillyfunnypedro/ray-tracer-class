@@ -14,6 +14,7 @@ import Ray from './Ray';
 import Intersection from './Intersection';
 import Camera from '../Camera';
 import Color from './../Color';
+import ThreeDTexture from './ThreeDTexture';
 
 
 
@@ -108,7 +109,21 @@ class Scene {
             let diffuseIntensity = Math.max(vec3.dot(lightDirection, normal), 0);
 
             let diffuseColor = vec3.create();
-            vec3.multiply(diffuseColor, lightColor, intersection.hitShape!.color);
+            let surfaceColor = intersection.hitShape!.color;
+            // check for 3d texture
+            if (intersection.hitShape!.threeDTexture !== "") {
+                surfaceColor = vec3.create();
+                let objectSpacePoint = vec3.copy(vec3.create(), intersection.position);
+
+
+                let texture = ThreeDTexture.getInstance().evaluateTexture(intersection.hitShape!.threeDTexture, objectSpacePoint);
+
+                surfaceColor = texture;
+            }
+
+            vec3.multiply(diffuseColor, lightColor, surfaceColor);
+
+
             vec3.scale(diffuseColor, diffuseColor, diffuseIntensity);
             vec3.scale(diffuseColor, diffuseColor, intersection.hitShape!.diffuse);
 

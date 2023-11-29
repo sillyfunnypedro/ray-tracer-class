@@ -47,6 +47,11 @@ class Intersection {
     uv: vec3 = vec3.create();
 
     /**
+     * uvw coordinates
+     */
+    uvw: vec3 = vec3.create();
+
+    /**
      * 
      * generation of the ray that hit us
      */
