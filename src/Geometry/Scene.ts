@@ -76,9 +76,19 @@ class Scene {
             let backgroundColor = vec3.copy(vec3.create(), this.backgroundColor);
             return backgroundColor;
         }
-        for (let light of this.lights) {
+        let surfaceColor = intersection.hitShape!.color;
+        // check for 3d texture
+        if (intersection.hitShape!.threeDTexture !== "") {
+            surfaceColor = vec3.create();
+            let objectSpacePoint = vec3.copy(vec3.create(), intersection.position);
 
-            let difuseColor = vec3.create();
+
+            let texture = ThreeDTexture.getInstance().evaluateTexture(intersection.hitShape!.threeDTexture, objectSpacePoint);
+
+            surfaceColor = texture;
+        }
+
+        for (let light of this.lights) {
 
             let lightColor = vec3.create();
             vec3.copy(lightColor, light.color);
@@ -109,17 +119,6 @@ class Scene {
             let diffuseIntensity = Math.max(vec3.dot(lightDirection, normal), 0);
 
             let diffuseColor = vec3.create();
-            let surfaceColor = intersection.hitShape!.color;
-            // check for 3d texture
-            if (intersection.hitShape!.threeDTexture !== "") {
-                surfaceColor = vec3.create();
-                let objectSpacePoint = vec3.copy(vec3.create(), intersection.position);
-
-
-                let texture = ThreeDTexture.getInstance().evaluateTexture(intersection.hitShape!.threeDTexture, objectSpacePoint);
-
-                surfaceColor = texture;
-            }
 
             vec3.multiply(diffuseColor, lightColor, surfaceColor);
 
@@ -128,14 +127,7 @@ class Scene {
             vec3.scale(diffuseColor, diffuseColor, intersection.hitShape!.diffuse);
 
 
-            // ambient color
-            let ambientColor = vec3.create();
-            vec3.copy(ambientColor, intersection.hitShape!.color);
-            vec3.scale(ambientColor, ambientColor, intersection.hitShape!.ambient);
-
-            // calculate the reflected ray 
-
-            // reflect the ray around the normal
+            // get the reflected ray
             const reflectedRay = intersection.reflectedRay;
 
             vec3.normalize(reflectedRay.direction, reflectedRay.direction);
@@ -164,9 +156,18 @@ class Scene {
 
             vec3.add(color, color, diffuseColor);
             vec3.add(color, color, specularColor);
-            vec3.add(color, color, ambientColor);
+
             vec3.add(color, color, reflectedColor);
         }
+        if (this.lights.length > 0) {
+            color = vec3.scale(color, color, 1 / this.lights.length);
+        }
+
+        // ambient color
+        let ambientColor = vec3.create();
+        vec3.copy(ambientColor, surfaceColor);
+        vec3.scale(ambientColor, ambientColor, intersection.hitShape!.ambient);
+        vec3.add(color, color, ambientColor);
 
         return color;
     }

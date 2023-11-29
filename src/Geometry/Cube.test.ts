@@ -63,6 +63,14 @@ describe("Cube", () => {
         expect(delta).toBeLessThan(0.0001);
     });
 
+    it("should compute the bounding box after scaling", () => {
+        let cube = new Cube();
+        cube.scale(vec3.fromValues(2, 2, 2));
+        cube.computeBoundingBox();
+        expect(cube.boundingBoxOrigin).toEqual(vec3.fromValues(-2, -2, -2));
+        expect(cube.boundingBoxSize).toEqual(vec3.fromValues(4, 4, 4));
+    });
+
 
 });
 

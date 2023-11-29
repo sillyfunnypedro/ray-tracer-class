@@ -54,8 +54,8 @@ describe('Sphere', () => {
 
         sphere.computeBoundingBox();
 
-        expect(sphere.boundingBoxOrigin).toEqual(vec3.fromValues(-5, -5, -5));
-        expect(sphere.boundingBoxSize).toEqual(vec3.fromValues(10, 10, 10));
+        expect(sphere.boundingBoxOrigin).toEqual(vec3.fromValues(-radius, -radius, -radius));
+        expect(sphere.boundingBoxSize).toEqual(vec3.fromValues(2 * radius, 2 * radius, 2 * radius));
     });
 });
 

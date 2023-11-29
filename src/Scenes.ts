@@ -8,6 +8,7 @@ import Shape from './Geometry/Shape';
 import Light from './Geometry/Light';
 import Sphere from './Geometry/Sphere';
 import Triangle from './Geometry/Triangle';
+import Cylinder from './Geometry/Cylinder';
 import Cube from './Geometry/Cube';
 import Camera from './Camera';
 import { vec3 } from 'gl-matrix';
@@ -42,19 +43,19 @@ export default Scenes;
 
 
 function addPlane(scene: Scene, width: number, depth: number, texture3D: string = "") {
-    let triangle = new Triangle(vec3.fromValues(-width, 0, -depth), vec3.fromValues(width, 0, -depth), vec3.fromValues(-width, 0, depth),);
+    let triangle = new Triangle(vec3.fromValues(-width, 0, -depth), vec3.fromValues(-width, 0, depth), vec3.fromValues(width, 0, -depth),);
     triangle.color = vec3.fromValues(1, 1, 1);
     triangle.ambient = 0.2;
     triangle.diffuse = 0.4;
     triangle.specular = 0.4;
     triangle.shininess = 100;
-    triangle.reflectivity = 0.5;
+    triangle.reflectivity = 1.0;
     scene.shapes.push(triangle);
     if (texture3D !== "") {
         triangle.threeDTexture = texture3D;
     }
 
-    let triangle2 = new Triangle(vec3.fromValues(-width, 0, depth), vec3.fromValues(width, 0, -depth), vec3.fromValues(width, 0, depth),);
+    let triangle2 = new Triangle(vec3.fromValues(-width, 0, depth), vec3.fromValues(width, 0, depth), vec3.fromValues(width, 0, -depth),);
     triangle2.color = vec3.fromValues(1, 1, 1);
     triangle2.ambient = 0.2;
     triangle2.diffuse = 0.4;
@@ -67,6 +68,43 @@ function addPlane(scene: Scene, width: number, depth: number, texture3D: string 
     }
 
 }
+
+function createCylinder() {
+    let scene = new Scene();
+    scene.backgroundColor = vec3.fromValues(0.5, 0.5, 0.5);
+
+    let cylinder = new Cylinder();
+    cylinder.translate(vec3.fromValues(0, 1.5, 0));
+    cylinder.scale(vec3.fromValues(1, 1, 1));
+    cylinder.color = vec3.fromValues(1, 0, 1);
+    cylinder.ambient = 0.2;
+    cylinder.diffuse = 0.4;
+    cylinder.specular = 0.4;
+    cylinder.shininess = 100;
+    cylinder.reflectivity = 0.5;
+
+
+    scene.shapes.push(cylinder);
+
+    addPlane(scene, 100, 100, "checkerboard");
+
+    let light = new Light();
+    light.position = vec3.fromValues(5, 5, 0);
+    light.intensity = 1;
+    light.color = vec3.fromValues(1, 1, 1);
+
+    scene.lights.push(light);
+
+    scene.rayDepth = 1;
+
+    scene.camera.setEyePosition(vec3.fromValues(10, 10, 10));
+    scene.camera.setLookAt(vec3.fromValues(0, 0, 0));
+    scene.camera.fieldOfView = 30;
+    scene.camera.setUpVector(vec3.fromValues(0, 1, 0));
+    Scenes.addScene('cylinder', scene);
+}
+
+
 function createSphere() {
     let scene = new Scene();
     scene.backgroundColor = vec3.fromValues(0.5, 0.5, 0.5);
@@ -82,7 +120,7 @@ function createSphere() {
     sphere.reflectivity = 0.5;
     sphere.threeDTexture = "checkerboard"
 
-    scene.shapes.push(sphere);
+    //scene.shapes.push(sphere);
 
     addPlane(scene, 5, 5);
 
@@ -107,19 +145,20 @@ function createCube() {
     let cube = new Cube();
     cube.translate(vec3.fromValues(0, 1.1, 0));
     //cube.scale(vec3.fromValues(1, 1, 1));
-    cube.color = vec3.fromValues(1, 0, 1);
+    cube.color = vec3.fromValues(1, 1, 1);
     cube.ambient = 0.2;
     cube.diffuse = 0.4;
     cube.specular = 0.4;
     cube.shininess = 100;
-    cube.reflectivity = 0.5;
+    cube.reflectivity = 1;
+    cube.rotateY(4);
     //cube.threeDTexture = "checkerboard"
 
     scene.shapes.push(cube);
 
-    //addPlane(scene, 10, 10, "checkerboard");
+    addPlane(scene, 100, 100, "checkerboard");
 
-    let lightHeight = 2;
+    let lightHeight = 5;
     let light = new Light();
     light.position = vec3.fromValues(0, lightHeight, 0);
     light.color = vec3.fromValues(1, 1, 1);
@@ -151,7 +190,7 @@ function createCube() {
 
 
 
-    scene.rayDepth = 1;
+    scene.rayDepth = 2;
 
     scene.camera.setEyePosition(vec3.fromValues(15, 5, 15));
     scene.camera.setLookAt(vec3.fromValues(0, 0, 0));
@@ -164,25 +203,7 @@ function createTriangle() {
     let scene = new Scene();
     scene.backgroundColor = vec3.fromValues(0.5, 0.5, 0.5);
 
-    let triangle = new Triangle(vec3.fromValues(-1000, 0, -1000), vec3.fromValues(-1000, 0, 1000), vec3.fromValues(1000, 0, -1000),);
-    triangle.color = vec3.fromValues(1, 1, 1);
-    triangle.ambient = 0.2;
-    triangle.diffuse = 0.4;
-    triangle.specular = 0.4;
-    triangle.shininess = 100;
-    triangle.reflectivity = 0;
-    triangle.threeDTexture = 'checkerboard';
-    scene.shapes.push(triangle);
-
-    let triangle2 = new Triangle(vec3.fromValues(-101, 0, 100), vec3.fromValues(100, 0, 100), vec3.fromValues(99, 0, -100),);
-    triangle2.color = vec3.fromValues(1, 1, 1);
-    triangle2.ambient = 0.2;
-    triangle2.diffuse = 0.4;
-    triangle2.specular = 0.4;
-    triangle2.shininess = 100;
-    triangle2.reflectivity = 0;
-    triangle2.threeDTexture = 'checkerboard';
-    scene.shapes.push(triangle2);
+    addPlane(scene, 10, 10, "checkerboard");
 
 
 
@@ -213,21 +234,22 @@ function createSquareAndSphere() {
     sphere.specular = 0.4;
     sphere.shininess = 100;
     sphere.reflectivity = 0.5;
+    sphere.threeDTexture = "checkerboard"
 
     scene.shapes.push(sphere);
 
-    let sphere2 = new Sphere();
-    sphere2.translate(vec3.fromValues(2, 6, 0));
+    let cylinder = new Cylinder();
+    cylinder.translate(vec3.fromValues(2, 6, 0));
     //sphere2.scale(vec3.fromValues(0.3, 0.3, 0.3));
-    sphere2.color = vec3.fromValues(0, 0, 1);
-    sphere2.ambient = 0.2;
-    sphere2.diffuse = 0.4;
-    sphere2.specular = 0.4;
-    sphere2.shininess = 100;
-    sphere2.reflectivity = 1;
-    sphere.threeDTexture = "checkerboard"
+    cylinder.color = vec3.fromValues(0, 0, 1);
+    cylinder.ambient = 0.2;
+    cylinder.diffuse = 0.4;
+    cylinder.specular = 0.4;
+    cylinder.shininess = 100;
+    cylinder.reflectivity = 1;
 
-    scene.shapes.push(sphere2);
+
+    scene.shapes.push(cylinder);
 
     let sphere3 = new Sphere();
     sphere3.translate(vec3.fromValues(7, 1.5, -7));
@@ -477,6 +499,7 @@ function manySpheres() {
 function createScenes() {
     createSphere();
     createCube();
+    createCylinder();
     createTriangle();
     createSquareAndSphere()
     createTwoSphere();

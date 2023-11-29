@@ -9,7 +9,8 @@ import Ray from './Ray';
 import Intersection from './Intersection';
 
 
-
+const MIN_VALUE = -1;
+const MAX_VALUE = 1;
 class Cube extends Shape {
     // 2 by 2 by 2 cube
     vertices: vec3[] = [
@@ -26,6 +27,7 @@ class Cube extends Shape {
         super();
         this.computeBoundingBox();
     }
+
 
     computeBoundingBox(): void {
         this.boundingBoxExists = true;
@@ -57,22 +59,23 @@ class Cube extends Shape {
         }
 
         // first get the ray in object space
-        let rayOriginObjectSpace = this.getRayInObjectSpace(ray);
+        let rayInObjectSpace = this.getRayInObjectSpace(ray);
 
         // we have the ray in object space so we can do the slab method against -1,1 for all axis
         // we are going to do this using the slab methhod
         // we are going to do this for each axis
-        // x axis
-        let tmin = (-1 - rayOriginObjectSpace.origin[0]) / rayOriginObjectSpace.direction[0];
-        let tmax = (1 - rayOriginObjectSpace.origin[0]) / rayOriginObjectSpace.direction[0];
+        // x axis first, remember x is -1 to 1
+        let tmin = (MIN_VALUE - rayInObjectSpace.origin[0]) / rayInObjectSpace.direction[0];
+        let tmax = (MAX_VALUE - rayInObjectSpace.origin[0]) / rayInObjectSpace.direction[0];
 
         if (tmin > tmax) {
             [tmin, tmax] = [tmax, tmin];
         }
 
         // now do the same for y then see if it is an obvious miss
-        let tymin = (-1 - rayOriginObjectSpace.origin[1]) / rayOriginObjectSpace.direction[1];
-        let tymax = (1 - rayOriginObjectSpace.origin[1]) / rayOriginObjectSpace.direction[1];
+        // y axis is -1 to 1
+        let tymin = (MIN_VALUE - rayInObjectSpace.origin[1]) / rayInObjectSpace.direction[1];
+        let tymax = (MAX_VALUE - rayInObjectSpace.origin[1]) / rayInObjectSpace.direction[1];
 
         if (tymin > tymax) {
             [tymin, tymax] = [tymax, tymin]
@@ -92,9 +95,11 @@ class Cube extends Shape {
         if (tymax < tmax) {
             tmax = tymax;
         }
+        // now do the same for z then see if it is an obvious miss
+        // z axis is -1 to 1
 
-        let tzmin = (-1 - rayOriginObjectSpace.origin[2]) / rayOriginObjectSpace.direction[2];
-        let tzmax = (1 - rayOriginObjectSpace.origin[2]) / rayOriginObjectSpace.direction[2];
+        let tzmin = (MIN_VALUE - rayInObjectSpace.origin[2]) / rayInObjectSpace.direction[2];
+        let tzmax = (MAX_VALUE - rayInObjectSpace.origin[2]) / rayInObjectSpace.direction[2];
 
         if (tzmin > tzmax) {
             let temp = tzmin;
@@ -130,8 +135,8 @@ class Cube extends Shape {
         // we are on a face
         // we need to figure out which face we are on
         let hitPoint = vec3.create();
-        vec3.scaleAndAdd(hitPoint, rayOriginObjectSpace.origin, rayOriginObjectSpace.direction, tmin);
-        let minDistance = Number.MAX_VALUE;
+        vec3.scaleAndAdd(hitPoint, rayInObjectSpace.origin, rayInObjectSpace.direction, tmin);
+        let minDistance = 0.0001;
         let closestFace = 0;
         // we are going to do this really simply.
         // if position.x is -1 then the normal is -1,0,0
@@ -144,29 +149,29 @@ class Cube extends Shape {
 
         // x faces
         if (Math.abs(hitPoint[0] + 1) < minDistance) {
-            minDistance = Math.abs(hitPoint[0] + 1);
+
             closestFace = 0;
         }
         if (Math.abs(hitPoint[0] - 1) < minDistance) {
-            minDistance = Math.abs(hitPoint[0] - 1);
+
             closestFace = 1;
         }
         // y faces
         if (Math.abs(hitPoint[1] + 1) < minDistance) {
-            minDistance = Math.abs(hitPoint[1] + 1);
+
             closestFace = 2;
         }
         if (Math.abs(hitPoint[1] - 1) < minDistance) {
-            minDistance = Math.abs(hitPoint[1] - 1);
+
             closestFace = 3;
         }
         // z faces
         if (Math.abs(hitPoint[2] + 1) < minDistance) {
-            minDistance = Math.abs(hitPoint[2] + 1);
+
             closestFace = 4;
         }
         if (Math.abs(hitPoint[2] - 1) < minDistance) {
-            minDistance = Math.abs(hitPoint[2] - 1);
+
             closestFace = 5;
         }
 
@@ -195,24 +200,25 @@ class Cube extends Shape {
                 intersection.normal = vec3.fromValues(0, 0, 1);
                 intersection.uvw = vec3.fromValues(hitPoint[0], hitPoint[1], 1);
                 break;
-
-
-                intersection.normal = this.transformNormalToWorldSpace(intersection.normal);
-                let worldSpacePoint = this.transformPointToWorldSpace(hitPoint);
-
-                let reflectedRay = this.getReflectedRay(ray, intersection.normal, worldSpacePoint);
-                reflectedRay.generation = ray.generation + 1;
-
-
-
-
-                intersection.hitDistance = tmin;
-                intersection.hitShape = this;
-                intersection.reflectedRay = reflectedRay;
-                intersection.position = this.transformPointToWorldSpace(hitPoint);
-            //intersection.uv = this.getUV(intersection.normal, intersection.position);
-
         }
+
+
+        intersection.normal = this.transformNormalToWorldSpace(intersection.normal);
+        let worldSpacePoint = this.transformPointToWorldSpace(hitPoint);
+
+        let reflectedRay = this.getReflectedRay(ray, intersection.normal, worldSpacePoint);
+        reflectedRay.generation = ray.generation + 1;
+
+
+
+
+        intersection.hitDistance = tmin;
+        intersection.hitShape = this;
+        intersection.reflectedRay = reflectedRay;
+        intersection.position = this.transformPointToWorldSpace(hitPoint);
+        //intersection.uv = this.getUV(intersection.normal, intersection.position);
+
+
         return intersection;
     }
 
