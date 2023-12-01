@@ -42,9 +42,9 @@ class Scenes {
 export default Scenes;
 
 
-function addPlane(scene: Scene, width: number, depth: number, texture3D: string = "") {
+function addPlane(scene: Scene, width: number, depth: number, texture3D: string = "", color: vec3) {
     let triangle = new Triangle(vec3.fromValues(-width, 0, -depth), vec3.fromValues(-width, 0, depth), vec3.fromValues(width, 0, -depth),);
-    triangle.color = vec3.fromValues(1, 1, 1);
+    triangle.color = color;
     triangle.ambient = 0.2;
     triangle.diffuse = 0.4;
     triangle.specular = 0.4;
@@ -56,7 +56,7 @@ function addPlane(scene: Scene, width: number, depth: number, texture3D: string 
     }
 
     let triangle2 = new Triangle(vec3.fromValues(-width, 0, depth), vec3.fromValues(width, 0, depth), vec3.fromValues(width, 0, -depth),);
-    triangle2.color = vec3.fromValues(1, 1, 1);
+    triangle2.color = color;
     triangle2.ambient = 0.2;
     triangle2.diffuse = 0.4;
     triangle2.specular = 0.4;
@@ -81,15 +81,17 @@ function createCylinder() {
     cylinder.diffuse = 0.4;
     cylinder.specular = 0.4;
     cylinder.shininess = 100;
-    cylinder.reflectivity = 0.5;
+    cylinder.reflectivity = 0.9;
+
 
 
     scene.shapes.push(cylinder);
 
-    addPlane(scene, 100, 100, "checkerboard");
+
+    addPlane(scene, 100, 100, "checkerboard", vec3.fromValues(0, 0, 0.5));
 
     let light = new Light();
-    light.position = vec3.fromValues(5, 5, 0);
+    light.position = vec3.fromValues(0, 5, 0);
     light.intensity = 1;
     light.color = vec3.fromValues(1, 1, 1);
 
@@ -110,19 +112,20 @@ function createSphere() {
     scene.backgroundColor = vec3.fromValues(0.5, 0.5, 0.5);
 
     let sphere = new Sphere();
-    //sphere.translate(vec3.fromValues(2, 0, 0));
+    sphere.translate(vec3.fromValues(0, 1.1, 0));
 
-    sphere.color = vec3.fromValues(1, 1, 1);
-    sphere.ambient = 0.2;
+    sphere.color = vec3.fromValues(1, 0, 1);
+    sphere.ambient = 0.9;
     sphere.diffuse = 0.4;
-    sphere.specular = 0.4;
+    sphere.specular = 0.2;
     sphere.shininess = 100;
     sphere.reflectivity = 0.5;
-    sphere.threeDTexture = "checkerboard"
+    sphere.threeDTexture = "perlin"
 
-    //scene.shapes.push(sphere);
+    scene.shapes.push(sphere);
 
-    addPlane(scene, 5, 5);
+    //addPlane(scene, 30, 30, "checkerboard", vec3.fromValues(0.5, 0.5, 0.5));
+    addPlane(scene, 30, 30, "checkerboardreflect", vec3.fromValues(0.5, 0.5, 0.5));
 
     let light = new Light();
     light.position = vec3.fromValues(5, 5, 10);
@@ -130,7 +133,7 @@ function createSphere() {
     light.color = vec3.fromValues(1, 1, 1);
 
     scene.lights.push(light);
-    scene.rayDepth = 2;
+    scene.rayDepth = 1;
 
     scene.camera.setEyePosition(vec3.fromValues(5, 5, 5));
     scene.camera.setLookAt(vec3.fromValues(0, 0, 0));
@@ -145,18 +148,19 @@ function createCube() {
     let cube = new Cube();
     cube.translate(vec3.fromValues(0, 1.1, 0));
     //cube.scale(vec3.fromValues(1, 1, 1));
-    cube.color = vec3.fromValues(1, 1, 1);
+    cube.color = vec3.fromValues(1, 0, 0);
     cube.ambient = 0.2;
     cube.diffuse = 0.4;
     cube.specular = 0.4;
     cube.shininess = 100;
     cube.reflectivity = 1;
+    cube.rotateX(90);
     cube.rotateY(4);
     //cube.threeDTexture = "checkerboard"
 
     scene.shapes.push(cube);
 
-    addPlane(scene, 100, 100, "checkerboard");
+    addPlane(scene, 100, 100, "checkerboard", vec3.fromValues(0, 0.5, 0));
 
     let lightHeight = 5;
     let light = new Light();
@@ -203,7 +207,7 @@ function createTriangle() {
     let scene = new Scene();
     scene.backgroundColor = vec3.fromValues(0.5, 0.5, 0.5);
 
-    addPlane(scene, 10, 10, "checkerboard");
+    addPlane(scene, 10, 10, "checkerboard", vec3.fromValues(0.5, 0.5, 0));
 
 
 
@@ -338,6 +342,67 @@ function createSquareAndSphere() {
     scene.rayDepth = 8;
     Scenes.addScene('squareAndSphere', scene);
 }
+
+function createMyScene() {
+    let scene = new Scene();
+    scene.backgroundColor = vec3.fromValues(0.5, 0.5, 0.5);
+
+    let sphere = new Sphere();
+    sphere.translate(vec3.fromValues(-2, 6, 0));
+    sphere.scale(vec3.fromValues(1.3, 1.3, 1.3));
+    sphere.color = vec3.fromValues(0, .5, 0);
+    sphere.ambient = 0.2;
+    sphere.diffuse = 0.4;
+    sphere.specular = 0.4;
+    sphere.shininess = 100;
+    sphere.reflectivity = 0.5;
+    sphere.threeDTexture = "checkerboard"
+
+    scene.shapes.push(sphere);
+
+    let cylinder = new Cylinder();
+    cylinder.translate(vec3.fromValues(1, 6, 0));
+    //sphere2.scale(vec3.fromValues(0.3, 0.3, 0.3));
+    cylinder.color = vec3.fromValues(0, 0, 1);
+    cylinder.ambient = 0.2;
+    cylinder.diffuse = 0.4;
+    cylinder.specular = 0.4;
+    cylinder.shininess = 100;
+    cylinder.reflectivity = 1;
+    cylinder.threeDTexture = "perlin"
+
+    scene.shapes.push(cylinder);
+
+    let cube = new Cube();
+
+    cube.translate(vec3.fromValues(4, 6, 0));
+    cube.scale(vec3.fromValues(1, 1, 1));
+    cube.color = vec3.fromValues(1, 0, 0);
+    cube.ambient = 0.2;
+    cube.diffuse = 0.4;
+    cube.specular = 0.4;
+    cube.shininess = 100;
+    cube.reflectivity = 0.3
+    cube.threeDTexture = "checkerboardreflect"
+
+    scene.shapes.push(cube);
+
+    addPlane(scene, 100, 100, "mytexture", vec3.fromValues(0, 0.5, 0));
+
+    let light = new Light();
+    light.position = vec3.fromValues(-15, 30, 15);
+    light.intensity = 5;
+    light.color = vec3.fromValues(1, 1, 1);
+
+    scene.lights.push(light);
+
+    scene.rayDepth = 2;
+
+    scene.camera.setEyePosition(vec3.fromValues(15, 9, 30));
+    scene.camera.setLookAt(vec3.fromValues(1, 0, 0));
+    Scenes.addScene('myScene', scene);
+}
+
 
 function createTwoSphere() {
     let scene = new Scene();
@@ -505,6 +570,7 @@ function createScenes() {
     createTwoSphere();
     createFiveSpheres();
     manySpheres();
+    createMyScene();
 
 }
 

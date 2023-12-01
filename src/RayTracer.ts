@@ -137,9 +137,9 @@ class RayTracer {
                 // this is for debugging and finding a single pixel.
 
                 // uncomment this to find a single pixel and then put a break point on the next call to intersect.
-                let debuggingSinglePixel = true
+                let debuggingSinglePixel = true;
                 if (debuggingSinglePixel &&
-                    (i === -20 + this._frameBuffer.height / 2 && j === -20 + this._frameBuffer.width / 2)) {
+                    (i === 35 + this._frameBuffer.height / 2 && j ===  this._frameBuffer.width / 2)) {
                     console.log("center");
                     this._frameBuffer.pixels[i][j] = Color.createFromVec3(vec3.fromValues(0, 1, 0));
                     let color = scene.intersect(ray, null, useBoundingBox);

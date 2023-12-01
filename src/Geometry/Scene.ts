@@ -14,8 +14,8 @@ import Ray from './Ray';
 import Intersection from './Intersection';
 import Camera from '../Camera';
 import Color from './../Color';
-import ThreeDTexture from './ThreeDTexture';
-
+import ThreeDTexture from './TextureManager';
+import ShadeParameters from './ShadeParameters';
 
 
 /**
@@ -69,6 +69,10 @@ class Scene {
      */
     computeShadows: boolean = true;
 
+
+
+
+    // This should probably be in its own file but for now we leave it here. REFACTOR
     computeShading(intersection: Intersection): vec3 {
         let color = vec3.create()
 
@@ -76,16 +80,36 @@ class Scene {
             let backgroundColor = vec3.copy(vec3.create(), this.backgroundColor);
             return backgroundColor;
         }
-        let surfaceColor = intersection.hitShape!.color;
+        let surfaceColor = vec3.create();
+        let shadeParameters = new ShadeParameters();
+        shadeParameters.color = intersection.hitShape!.color;
+        shadeParameters.resultingColor = vec3.create();
+        shadeParameters.resultingColor = vec3.copy(vec3.create(), shadeParameters.color);
+
+        shadeParameters.position = intersection.position;
+        shadeParameters.normal = intersection.normal;
+        shadeParameters.ambient = intersection.hitShape!.ambient;
+        shadeParameters.diffuse = intersection.hitShape!.diffuse;
+        shadeParameters.specular = intersection.hitShape!.specular;
+        shadeParameters.shininess = intersection.hitShape!.shininess;
+        shadeParameters.reflectivity = intersection.hitShape!.reflectivity;
+        shadeParameters.refractivity = intersection.hitShape!.refractivity;
+        shadeParameters.refractiveIndex = intersection.hitShape!.refractiveIndex;
+        shadeParameters.uv = intersection.uv;
+        shadeParameters.uvw = intersection.uvw;
+
+        surfaceColor = vec3.copy(vec3.create(), shadeParameters.color);
         // check for 3d texture
         if (intersection.hitShape!.threeDTexture !== "") {
+
+
             surfaceColor = vec3.create();
             let objectSpacePoint = vec3.copy(vec3.create(), intersection.position);
 
 
-            let texture = ThreeDTexture.getInstance().evaluateTexture(intersection.hitShape!.threeDTexture, objectSpacePoint);
+            let resultingShadeParameters = ThreeDTexture.getInstance().evaluateTexture(intersection.hitShape!.threeDTexture, shadeParameters);
 
-            surfaceColor = texture;
+            surfaceColor = resultingShadeParameters.resultingColor;
         }
 
         for (let light of this.lights) {
@@ -99,6 +123,7 @@ class Scene {
             vec3.subtract(lightDirection, lightDirection, intersection.position);
             vec3.normalize(lightDirection, lightDirection);
 
+            // are we in shadow
             if (this.computeShadows) {
                 let shadowRay = Ray.create();
                 let distanceToLight = vec3.distance(light.position, intersection.position);
@@ -113,7 +138,7 @@ class Scene {
             }
 
             let normal = vec3.create();
-            vec3.copy(normal, intersection.normal);
+            vec3.copy(normal, shadeParameters.normal);
             vec3.normalize(normal, normal);
 
             let diffuseIntensity = Math.max(vec3.dot(lightDirection, normal), 0);
@@ -136,14 +161,14 @@ class Scene {
             let reflectedColor = vec3.create();
 
             // if the generation the ray that hit us is one less that the depth then we do not do a reflection or refraction call
-            if (intersection.generation < this.rayDepth && intersection.hitShape!.reflectivity > 0) {
+            if (reflectedRay.generation < this.rayDepth && shadeParameters.reflectivity > 0) {
 
                 reflectedRay.generation = intersection.generation + 1;
                 let reflectedObject = this.intersect(reflectedRay, intersection.hitShape!, this.useBoundingBox);
                 if (reflectedObject.hitDistance !== Number.MAX_VALUE) {
                     reflectedColor = this.computeShading(reflectedObject);
                 }
-                vec3.scale(reflectedColor, reflectedColor, intersection.hitShape!.reflectivity);
+                vec3.scale(reflectedColor, reflectedColor, shadeParameters.reflectivity);
 
             }
 

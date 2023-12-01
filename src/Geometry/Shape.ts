@@ -26,7 +26,7 @@ abstract class Shape {
     boundingBoxSize: vec3 = vec3.create();
     boundingBoxExists: boolean = false;
     threeDTexture: string = "";
-    texture3DCoordinates: vec3 = vec3.create();
+
 
     constructor() {
         this.color = vec3.create();

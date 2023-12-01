@@ -53,7 +53,7 @@ class Intersection {
 
     /**
      * 
-     * generation of the ray that hit us
+     * generation of the ray that hit us 
      */
     generation: number = 0;
 
