@@ -244,7 +244,8 @@ function createSquareAndSphere() {
 
     let cylinder = new Cylinder();
     cylinder.translate(vec3.fromValues(2, 6, 0));
-    //sphere2.scale(vec3.fromValues(0.3, 0.3, 0.3));
+    cylinder.scale(vec3.fromValues(0.1, 0.1, 5));
+    cylinder.rotateZ(34);
     cylinder.color = vec3.fromValues(0, 0, 1);
     cylinder.ambient = 0.2;
     cylinder.diffuse = 0.4;

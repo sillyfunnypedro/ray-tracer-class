@@ -1,6 +1,8 @@
 class StatsContainer {
-    elapsedTime: number = 0;
+    private _startTime: number = 0;
+
     static instance: StatsContainer | null = null;
+    private _stopRenderRequested: boolean = false;
 
     private constructor() {
         // do nothing
@@ -15,6 +17,27 @@ class StatsContainer {
             StatsContainer.instance = StatsContainer.create();
         }
         return StatsContainer.instance;
+    }
+
+    stopRenderRequested(): boolean {
+        return this._stopRenderRequested;
+    }
+
+    requestStopRender(): void {
+        this._stopRenderRequested = true;
+    }
+
+    clearStopRenderRequest(): void {
+        this._stopRenderRequested = false;
+    }
+
+    startTimer(): void {
+        this._startTime = Date.now();
+    }
+
+    getElapsedTime(): number {
+        let elapsedTime = Date.now() - this._startTime;
+        return elapsedTime;
     }
 
 }

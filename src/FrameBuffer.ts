@@ -13,6 +13,7 @@ class FrameBuffer {
     pixels: Color[][];
     zBuffer: number[][];
 
+
     constructor(width: number, height: number) {
         this.width = width;
         this.height = height;

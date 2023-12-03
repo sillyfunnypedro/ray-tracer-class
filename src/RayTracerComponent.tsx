@@ -7,6 +7,7 @@ import Scenes from './Scenes'
 import RayTracer from './RayTracer'
 import { buffer } from 'stream/consumers';
 import StatsContainer from './StatsContainer';
+import { Stats, stat } from 'fs';
 
 interface AppProps {
   pixelSize: number;
@@ -20,6 +21,7 @@ const frameBufferSize = [1280, 720];
 
 
 
+
 function RayTracerComponent({ pixelSize, setPixelSize, sceneName, updateStats }: AppProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -30,22 +32,21 @@ function RayTracerComponent({ pixelSize, setPixelSize, sceneName, updateStats }:
   const [renderingInProgress, setRenderingInProgress] = useState(false);
   const [frameNumber, setFrameNumber] = useState(0);
   const [progress, setProgress] = useState(0);
+
   const [imageVersion, setImageVersion] = useState(0);
 
-  let imageRendered = false;  // this gets called twice, so we need to make sure we only render once.
+  let imageRendering = false;  // this gets called twice, so we need to make sure we only render once.
+  let startTime = 0
 
   // make sure the render happens on start up.
   useEffect(() => {
-
-    const modelNames = Scenes.getScenes();
-
     startEverything();
   }, []);
 
 
 
   useEffect(() => {
-    console.log('pixelSize changed');
+    // StatsContainer.getInstance().requestStopRender();
     startEverything();
 
   }, [pixelSize, sceneName]);
@@ -53,45 +54,92 @@ function RayTracerComponent({ pixelSize, setPixelSize, sceneName, updateStats }:
 
 
   function startEverything() {
-    nextFrame();
+    startTime = performance.now();
+    startRender();
     setFrameNumber(frameNumber + 1);
+
   }
 
   function updateImage() {
     bufferImage();
     setImageVersion(imageVersion + 1);
   }
+  // set up a timer that will update the bufferImage every 1/30th of a second
+  // this will cause the canvas to be updated with the new image
+  // this will not cause the ray tracer to be called again.
 
+  // useEffect(() => {
+  //   const intervalId = setInterval(updateImage, 1000 / 30); // Approximately every 30th of a second
+  //   return () => clearInterval(intervalId);
+  // }, [frameNumber]);
 
-  function nextFrame() {
-    if (imageRendered) {
+  async function renderScanLines(scanLine: number) {
+
+    // check to see if a stop has been requested
+    if (StatsContainer.getInstance().stopRenderRequested()) {
+      StatsContainer.getInstance().clearStopRenderRequest();
       return;
     }
-    imageRendered = true;
-    console.log('nextFrame');
-    bufferImage();
-    //const intervalId = setInterval(bufferImage, 1000 / 30); // Approximately every 30th of a second
 
-    renderer.render(sceneName, (progress) => {
-      setProgress(progress);
-      updateImage();
-    }).then((elapsedTime) => {
-      console.log('render complete in ' + elapsedTime + ' seconds');
-      imageRendered = true;
+    // this is a demo ray tracer and thus showing progress is more important than speed.
+    // so we will render one scan line at a time.
+    const nextScanLine = await renderer.render(sceneName, scanLine);
 
-      let statsContainer = StatsContainer.getInstance();
-      statsContainer.elapsedTime = elapsedTime;
-      updateStats();
-      //clearInterval(intervalId);
-    });
+
+    // JavaScript is single threaded, so we need to yield to the browser to allow it to update the screen.
+    // This is the price we pay for having a single threaded environment.
+    await new Promise(resolve => setTimeout(resolve, 2))
+      .then(() => {
+        // update the stats. since we have given control back to the browser, the stats will be updated.
+        updateStats();
+        // update the image
+        bufferImage();
+        
+      });
+    //setProgress(nextScanLine);
+
+    if (nextScanLine < 0) {
+      return;
+    }
+    renderScanLines(nextScanLine);
   }
+
+  function startRender() {
+
+    // we do not want two ray tracers running at the same time.
+    if (imageRendering) {
+      return;
+    }
+
+    StatsContainer.getInstance().clearStopRenderRequest();
+
+    StatsContainer.getInstance().startTimer();
+
+
+
+    imageRendering = true;
+
+    // const renderingScanLines = true;
+
+    // if (renderingScanLines) {
+    //   renderScanLines(0).then(() => {
+    //     imageRendering = false;
+
+    //   });
+    // }
+
+    renderScanLines(0);
+
+  }
+
+
   //nextFrame();
   /** 
    * Get the image from the frame buffer and draw it on the canvas
    * 
    */
   function bufferImage() {
-    console.log('bufferImage')
+    // get the image data from the frame buffer
     const data = frameBuffer.getImageData(pixelSize);
     // now construct an image from the data
     const ctx = canvasRef.current?.getContext('2d');

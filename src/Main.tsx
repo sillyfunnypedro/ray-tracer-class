@@ -37,12 +37,12 @@ function Main() {
         if (currentScene) {
             currentScene.useBoundingBox = !currentScene.useBoundingBox;
             setUseBoundingBox(currentScene.useBoundingBox);
-            setElapsedTime(statsContainer.elapsedTime);
+            setElapsedTime(statsContainer.getElapsedTime());
 
         }
     }
     function updateStats() {
-        setElapsedTime(statsContainer.elapsedTime);
+        setElapsedTime(statsContainer.getElapsedTime());
     }
 
     // a Component that calls models.getModels and produces buttons for selecting models

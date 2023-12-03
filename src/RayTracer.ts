@@ -26,6 +26,8 @@ class RayTracer {
     private _screenLowerLeft = vec3.create();
     private _uDelta = vec3.create();
     private _vDelta = vec3.create();
+    private _rendering: boolean = false;
+    private _renderingProgress: number = 0;
 
     // private _scene: Scene;
 
@@ -96,9 +98,10 @@ class RayTracer {
     }
 
 
-    public async render(selectedScene: string, callback: (arg0: number) => void): Promise<number> {
+    public async render(selectedScene: string, scanLineRequest: number): Promise<number> {
 
         let startTime = Date.now();
+
 
         if (selectedScene === "") {
             return (0);
@@ -108,15 +111,20 @@ class RayTracer {
         if (scene === null || scene === undefined) {
             throw new Error("scene is null or undefined");
         }
+        if (scanLineRequest === 0) {
+            this._frameBuffer.clear(0, 0, 0.4);
+        }
 
         let useBoundingBox = scene.useBoundingBox;
 
 
+        if (scanLineRequest === this._frameBuffer.height) {
+            return -1;
+        }
+
+
         const eyePosition = scene.camera.eyePosition;
-        console.log("eyePosition: " + eyePosition);
-        console.log("lookAt: " + scene.camera.lookAt);
-        console.log(`resolution: ${this._frameBuffer.width} x ${this._frameBuffer.height}`)
-        for (let i = 0; i < this._frameBuffer.height; i++) {
+        for (let i = scanLineRequest; i < scanLineRequest + 1; i++) {
             for (let j = 0; j < this._frameBuffer.width; j++) {
 
                 const screenPosition = this.getScreenPosition2(j, this._frameBuffer.height - i, scene.camera);
@@ -139,7 +147,7 @@ class RayTracer {
                 // uncomment this to find a single pixel and then put a break point on the next call to intersect.
                 let debuggingSinglePixel = true;
                 if (debuggingSinglePixel &&
-                    (i === 35 + this._frameBuffer.height / 2 && j ===  this._frameBuffer.width / 2)) {
+                    (i === 35 + this._frameBuffer.height / 2 && j === this._frameBuffer.width / 2)) {
                     console.log("center");
                     this._frameBuffer.pixels[i][j] = Color.createFromVec3(vec3.fromValues(0, 1, 0));
                     let color = scene.intersect(ray, null, useBoundingBox);
@@ -148,12 +156,15 @@ class RayTracer {
                 let color = scene.computeShading(intersection);
                 this._frameBuffer.pixels[i][j] = Color.createFromVec3(color);
             }
-            let progress = Math.floor(i / this._frameBuffer.height * 100);
-            callback(progress);
+
+
         }
-        let endTime = Date.now();
-        let elapsedTime = endTime - startTime;
-        return elapsedTime;
+        let nextScanLine = scanLineRequest + 1;
+        if (nextScanLine === this._frameBuffer.height) {
+            nextScanLine = -1;
+        }
+
+        return nextScanLine;
     }
 
 

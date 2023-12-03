@@ -288,7 +288,7 @@ class Camera {
             mat4.ortho(this._projectionMatrix, left, right, bottom, top, this.nearPlane, this.farPlane);
             console.log(this._projectionMatrix)
         }
-        console.log(this._projectionMatrix)
+
 
     }
 
